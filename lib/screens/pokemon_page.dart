@@ -41,8 +41,11 @@ class _PokemonPageState extends State<PokemonPage> {
         foregroundColor: Colors.white,
       ),
       // 4. On remplace la Column par notre ListView.builder
-      body: ListView.builder(
-        // On lui dit combien d'éléments il y a dans notre liste
+
+      body: GridView.builder(
+        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+          crossAxisCount: 3
+        ),
         itemCount: pokemonList.length,
 
         // Cette fonction construit la "case" visuelle pour chaque élément
@@ -50,15 +53,8 @@ class _PokemonPageState extends State<PokemonPage> {
           final pokemon = pokemonList[index];
 
 
-          // ListTile est un widget natif de Flutter parfait pour les listes (avec une image à gauche, un titre, etc.)
-          return ListTile(
-            leading: Image.network(pokemon.imageUrl, width: 50, height: 50),
-            title: Text(
-              pokemon.name.toUpperCase(), // On met le nom en majuscules
-              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
-            ),
-            subtitle: Text('#${pokemon.id}'),
-            onTap: () {
+          return GestureDetector(
+            onTap: (){
               Navigator.push(
                 context,
                 MaterialPageRoute(
@@ -68,7 +64,16 @@ class _PokemonPageState extends State<PokemonPage> {
                   ),
                 ),
               );
-            }, // On affiche le numéro en dessous
+            },
+            child: Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Column(children: [
+                Image.network(pokemon.imageUrl, width: 50, height: 50),
+                //Text(pokemon.name.toUpperCase(), style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18),),
+                Text('#${pokemon.id}'),
+                
+              ],),
+            ),
           );
         },
       ),
