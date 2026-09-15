@@ -6,9 +6,12 @@ import '../models/pokemon.dart';
 import '../models/pokemon_detail.dart';
 
 class PokeApiService {
+  final http.Client client; 
+  PokeApiService({http.Client? client}) : client = client ?? http.Client();
+
   Future<List<Pokemon>> fetchPokemonList({int limit = 151}) async {
     final url = Uri.parse('https://pokeapi.co/api/v2/pokemon?limit=$limit');
-    final response = await http.get(url);
+    final response = await client.get(url);
 
     if (response.statusCode == 200) {
       final data = jsonDecode(response.body);
