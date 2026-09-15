@@ -1,0 +1,19 @@
+workflows:
+  ios-altstore:
+    name: Build iOS pour AltStore
+    instance_type: mac_mini_m1
+    environment:
+      flutter: stable
+    scripts:
+      - name: Récupérer les dépendances
+        script: flutter pub get
+      - name: Compiler le code iOS
+        script: flutter build ios --release --no-codesign
+      - name: Créer le fichier .ipa
+        script: |
+          cd build/ios/iphoneos
+          mkdir -p Payload
+          mv Runner.app Payload/
+          zip -q -r pokedex.ipa Payload
+    artifacts:
+      - build/ios/iphoneos/pokedex.ipa
