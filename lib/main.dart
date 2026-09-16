@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import 'screens/pokemon_page.dart';
+import 'screens/Region_page.dart';
 
 void main() {
   runApp(const PokedexApp());
@@ -13,7 +13,7 @@ class PokedexApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       theme: ThemeData.dark(),
-      home: const PokemonPage(), // On appelle notre nouvelle page ici
+      home: const RegionPage(), // On appelle notre nouvelle page ici
     );
   }
 }

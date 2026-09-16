@@ -5,7 +5,15 @@ import 'pokemon_detail_page.dart';
 import '../models/pokemon.dart';
 
 class PokemonPage extends StatefulWidget {
-  const PokemonPage({super.key});
+  final String regionName;
+  final int startId, endId;
+
+  const PokemonPage({
+    super.key,
+    required this.regionName,
+    required this.startId,
+    required this.endId,
+  });
 
   @override
   State<PokemonPage> createState() => _PokemonPageState();
@@ -18,8 +26,10 @@ class _PokemonPageState extends State<PokemonPage> {
   final PokeApiService apiService = PokeApiService();
 
   Future<void> fetchPokemonList() async {
+    int limit = widget.endId - widget.startId + 1; 
+    int offset = widget.startId - 1; 
     try {
-      final list = await apiService.fetchPokemonList();
+      final list = await apiService.fetchPokemonList(limit , offset);
       setState(() {
         pokemonList = list;
         isLoading = false;

@@ -22,7 +22,7 @@ void main() {
         when(() => fakeClient.get(url)).thenAnswer((_) async => fakeResponse);
         final service = PokeApiService(client: fakeClient);
 
-        final pokemons = await service.fetchPokemonList();
+        final pokemons = await service.fetchPokemonList(151, 0);
 
         expect(pokemons, isNotEmpty);
 

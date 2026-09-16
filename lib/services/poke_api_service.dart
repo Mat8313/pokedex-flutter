@@ -9,8 +9,8 @@ class PokeApiService {
   final http.Client client; 
   PokeApiService({http.Client? client}) : client = client ?? http.Client();
 
-  Future<List<Pokemon>> fetchPokemonList({int limit = 151}) async {
-    final url = Uri.parse('https://pokeapi.co/api/v2/pokemon?limit=$limit');
+  Future<List<Pokemon>> fetchPokemonList(int limit, int offset) async {
+    final url = Uri.parse('https://pokeapi.co/api/v2/pokemon?limit=$limit&offset=$offset');
     final response = await client.get(url);
 
     if (response.statusCode == 200) {
