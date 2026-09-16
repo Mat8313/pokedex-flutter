@@ -52,6 +52,66 @@ class _RegionPage extends State<RegionPage> {
         'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/393.png',
       ],
     ),
+    Region(
+      name: 'unys',
+      firstId: 494,
+      lastId: 649,
+      starters: [
+        'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/495.png',
+        'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/498.png',
+        'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/501.png',
+      ],
+    ),
+    Region(
+      name: 'kalos',
+      firstId: 650,
+      lastId: 721,
+      starters: [
+        'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/650.png',
+        'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/653.png',
+        'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/656.png',
+      ],
+    ),
+    Region(
+      name: 'alola',
+      firstId: 722,
+      lastId: 809,
+      starters: [
+        'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/722.png',
+        'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/725.png',
+        'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/728.png',
+      ],
+    ),
+    Region(
+      name: 'galar',
+      firstId: 810,
+      lastId: 898,
+      starters: [
+        'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/810.png',
+        'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/813.png',
+        'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/816.png',
+      ],
+    ),
+    Region(
+      name: 'hisui',
+      firstId: 899,
+      lastId: 905,
+      starters: [
+        'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/899.png',
+        'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/900.png',
+        'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/901.png',
+      ],
+    ),
+    Region(
+      name: 'paldea',
+      firstId: 906,
+      lastId: 1025,
+      starters: [
+        'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/906.png',
+        'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/909.png',
+        'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/912.png',
+      ],
+    ),
   ];
 
   @override
@@ -69,49 +129,37 @@ class _RegionPage extends State<RegionPage> {
       ),
 
       body: ListView.builder(
+        // On ajoute un padding global pour la liste
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         itemCount: regions.length,
         itemBuilder: (context, index) {
           final region = regions[index];
 
-          return Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: Container(
-              decoration: BoxDecoration(
-                color: const Color(0xFF1E1E1E),
-                borderRadius: BorderRadius.circular(16),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.3),
-                    blurRadius: 8,
-                    offset: const Offset(0, 4),
-                  ),
-                ],
+          return Container(
+            margin: const EdgeInsets.only(
+              bottom: 16,
+            ), // Espace entre les cartes
+            decoration: BoxDecoration(
+              // Un léger dégradé pour donner du relief à la carte
+              gradient: const LinearGradient(
+                colors: [Color(0xFF2A2D34), Color(0xFF1E1E1E)],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
               ),
-              child: ListTile(
-                leading: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Image.network(region.starters[0], height: 50, width: 50),
-                    Image.network(region.starters[1], height: 50, width: 50),
-                    Image.network(region.starters[2], height: 50, width: 50),
-                    Text(
-                      region.name.toUpperCase(),
-                      style: const TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 18,
-                      ),
-                    ),
-                    const SizedBox(width: 15),
-                    Text(
-                      '#${region.firstId.toString().padLeft(4, '0')}-#${region.lastId.toString().padLeft(4, '0')}',
-                      style: const TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 14,
-                      ),
-                    ),
-                  ],
+              borderRadius: BorderRadius.circular(20),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.4),
+                  blurRadius: 10,
+                  offset: const Offset(0, 5),
                 ),
+              ],
+            ),
+            // Material + InkWell permet d'avoir le bel effet de clic "vague"
+            child: Material(
+              color: Colors.transparent,
+              child: InkWell(
+                borderRadius: BorderRadius.circular(20),
                 onTap: () {
                   Navigator.push(
                     context,
@@ -124,6 +172,70 @@ class _RegionPage extends State<RegionPage> {
                     ),
                   );
                 },
+                child: Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      // --- GAUCHE : Textes ---
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            region.name.toUpperCase(),
+                            style: const TextStyle(
+                              fontWeight: FontWeight.w900,
+                              fontSize: 20,
+                              letterSpacing: 1.5,
+                              color: Colors.white,
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          // Petit Badge pour les IDs
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 10,
+                              vertical: 4,
+                            ),
+                            decoration: BoxDecoration(
+                              color: Colors.black.withValues(alpha: 0.3),
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: Text(
+                              '#${region.firstId.toString().padLeft(4, '0')} - #${region.lastId.toString().padLeft(4, '0')}',
+                              style: const TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 12,
+                                color: Colors.grey,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+
+                      // --- DROITE : Les 3 Starters ---
+                      Row(
+                        children: [
+                          Image.network(
+                            region.starters[0],
+                            height: 80,
+                            width: 80,
+                          ),
+                          Image.network(
+                            region.starters[1],
+                            height: 80,
+                            width: 80,
+                          ),
+                          Image.network(
+                            region.starters[2],
+                            height: 80,
+                            width: 80,
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
               ),
             ),
           );
