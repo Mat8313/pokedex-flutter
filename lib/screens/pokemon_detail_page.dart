@@ -49,7 +49,6 @@ class _PokemonDetailPageState extends State<PokemonDetailPage> {
       bgPath = typeBackgrounds[pokemonDetails!.types[0]] ?? bgPath;
     }
 
-    // 🪄 L'ombre magique qui rendra tout texte lisible, peu importe le fond !
     final List<Shadow> textShadows = [
       Shadow(
         offset: const Offset(1, 1),
@@ -97,7 +96,6 @@ class _PokemonDetailPageState extends State<PokemonDetailPage> {
                               ),
                               const SizedBox(height: 20),
 
-                              // ID et Nom avec ombre
                               Row(
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
@@ -117,7 +115,6 @@ class _PokemonDetailPageState extends State<PokemonDetailPage> {
                               ),
                               const SizedBox(height: 24),
 
-                              // Textes des Types avec ombre
                               Row(
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: pokemonDetails!.types.map((type) {
@@ -148,7 +145,6 @@ class _PokemonDetailPageState extends State<PokemonDetailPage> {
                               ),
                               const SizedBox(height: 24),
 
-                              // 🌑 Boîte assombrie pour faire ressortir les stats
                               Container(
                                 margin: const EdgeInsets.symmetric(horizontal: 40),
                                 padding: const EdgeInsets.symmetric(vertical: 12),
@@ -205,16 +201,35 @@ class _PokemonDetailPageState extends State<PokemonDetailPage> {
                           crossAxisSpacing: 10,
                           childAspectRatio: 0.8,
                         ),
-                        itemCount: 6,
+                        itemCount: (pokemonDetails!.sprites.values.where((element) => element != null).length),
+
                         itemBuilder: (context, index) {
+                          final entry = pokemonDetails!.sprites.entries
+                            .where((entry) => entry.value != null)
+                            .toList()[index];
+
+                          String currentSpriteUrl = entry.value!;
+                          String formName = entry.key; 
                           return Container(
                             decoration: BoxDecoration(
                               color: Colors.black.withValues(alpha: 0.2), // Grille assombrie
                               borderRadius: BorderRadius.circular(12),
                               border: Border.all(color: Colors.white.withValues(alpha: 0.1)),
                             ),
-                            child: Center(
-                              child: Image.network(imageUrl, height: 60, color: index > 0 ? Colors.black45 : null),
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Image.network(currentSpriteUrl,),
+                                Text(
+                                  formName.toUpperCase(), 
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.white,
+                                    shadows: textShadows,
+                                  )
+                                )
+                              ]
                             ),
                           );
                         },
@@ -229,7 +244,6 @@ class _PokemonDetailPageState extends State<PokemonDetailPage> {
     );
   }
 
-  // J'ai mis à jour ton Helper pour y inclure l'ombre des textes
   Widget _buildGlassStat(String label, String value, List<Shadow> textShadows) {
     return Column(
       children: [
