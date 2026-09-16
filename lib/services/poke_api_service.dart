@@ -18,7 +18,7 @@ class PokeApiService {
       final List results = data['results'];
 
       return List.generate(results.length, (index) {
-        return Pokemon.fromJson(results[index], index + 1);
+        return Pokemon.fromJson(results[index], index + offset + 1);
       });
     } else {
       throw Exception('Erreur lors du chargement de la liste');
