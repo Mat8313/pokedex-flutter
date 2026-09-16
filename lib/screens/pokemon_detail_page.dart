@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../services/poke_api_service.dart';
 import '../models/pokemon_detail.dart';
+import '../utils/type_helper.dart';
 
 class PokemonDetailPage extends StatefulWidget {
   final String pokemonName;
@@ -19,7 +20,6 @@ class PokemonDetailPage extends StatefulWidget {
 
 class _PokemonDetailPageState extends State<PokemonDetailPage> {
   PokemonDetail? pokemonDetails;
-
   final PokeApiService apiService = PokeApiService();
 
   Future<void> fetchPokemonDetails() async {
@@ -36,72 +36,237 @@ class _PokemonDetailPageState extends State<PokemonDetailPage> {
   @override
   void initState() {
     super.initState();
-    fetchPokemonDetails(); // On lance la requête au chargement de cette page
+    fetchPokemonDetails();
   }
 
   @override
   Widget build(BuildContext context) {
-    // On recrée l'URL de l'image avec l'ID pour l'afficher en grand
     final imageUrl =
         'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/${widget.pokemonId}.png';
 
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(widget.pokemonName.toUpperCase()),
-        backgroundColor: Colors.red[900],
-        foregroundColor: Colors.white,
-      ),
-      body: Center(
-        child: pokemonDetails == null
-            ? const CircularProgressIndicator()
-            : Column(
-                mainAxisAlignment:
-                    MainAxisAlignment.center, // On centre tout verticalement
-                children: [
-                  // L'image en grand !
-                  Image.network(imageUrl, height: 250),
-                  const SizedBox(height: 30),
+    String bgPath = 'assets/background/Fond_Type_Normal_GO.png';
+    if (pokemonDetails != null && pokemonDetails!.types.isNotEmpty) {
+      bgPath = typeBackgrounds[pokemonDetails!.types[0]] ?? bgPath;
+    }
 
-                  // Une petite "Card" (carte) pour faire un fond esthétique aux stats
-                  Card(
-                    color: Colors.grey[800], // Une couleur qui ressort bien en mode sombre
-                    child: Padding(
-                      padding: const EdgeInsets.all(20.0),
-                      child: Column(
-                        children: [
-                          Text(
-                            'Numéro : #${widget.pokemonId}',
-                            style: const TextStyle(
-                              fontSize: 20,
-                              color: Colors.grey,
-                            ),
+    // 🪄 L'ombre magique qui rendra tout texte lisible, peu importe le fond !
+    final List<Shadow> textShadows = [
+      Shadow(
+        offset: const Offset(1, 1),
+        blurRadius: 5.0,
+        color: Colors.black.withValues(alpha: 0.6), // Ombre noire semi-transparente
+      ),
+    ];
+
+    return DefaultTabController(
+      length: 3,
+      child: Scaffold(
+        extendBodyBehindAppBar: true,
+        appBar: AppBar(
+          backgroundColor: Colors.transparent,
+          elevation: 0,
+          foregroundColor: Colors.white,
+          leading: IconButton(
+            icon: const Icon(Icons.arrow_back_ios_new),
+            onPressed: () => Navigator.pop(context),
+          ),
+        ),
+        body: Container(
+          width: double.infinity,
+          height: double.infinity,
+          decoration: BoxDecoration(
+            image: DecorationImage(
+              image: AssetImage(bgPath),
+              fit: BoxFit.cover,
+            ),
+          ),
+          child: pokemonDetails == null
+              ? const Center(child: CircularProgressIndicator(color: Colors.white))
+              : NestedScrollView(
+                  headerSliverBuilder: (context, innerBoxIsScrolled) {
+                    return [
+                      SliverToBoxAdapter(
+                        child: SafeArea(
+                          bottom: false,
+                          child: Column(
+                            children: [
+                              const SizedBox(height: 10),
+                              Hero(
+                                tag: 'pokemon-${widget.pokemonId}',
+                                child: Image.network(imageUrl, height: 200, fit: BoxFit.contain),
+                              ),
+                              const SizedBox(height: 20),
+
+                              // ID et Nom avec ombre
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Icon(Icons.catching_pokemon, color: Colors.white, size: 28, shadows: textShadows),
+                                  const SizedBox(width: 8),
+                                  Text(
+                                    '${widget.pokemonId.toString().padLeft(4, '0')} ${widget.pokemonName.toUpperCase()}',
+                                    style: TextStyle(
+                                      fontSize: 24,
+                                      fontWeight: FontWeight.w900,
+                                      color: Colors.white,
+                                      letterSpacing: 1.5,
+                                      shadows: textShadows, // ⬅️ Application de l'ombre
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(height: 24),
+
+                              // Textes des Types avec ombre
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: pokemonDetails!.types.map((type) {
+                                  final iconPath = typeIcons[type];
+                                  return Padding(
+                                    padding: const EdgeInsets.symmetric(horizontal: 12.0),
+                                    child: Column(
+                                      children: [
+                                        if (iconPath != null)
+                                          Image.asset(iconPath, height: 48, width: 48)
+                                        else
+                                          const SizedBox(height: 48, width: 48),
+                                        const SizedBox(height: 6),
+                                        Text(
+                                          type,
+                                          style: TextStyle(
+                                            color: Colors.white,
+                                            fontSize: 12,
+                                            fontWeight: FontWeight.bold,
+                                            letterSpacing: 1,
+                                            shadows: textShadows, // ⬅️ Application de l'ombre
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  );
+                                }).toList(),
+                              ),
+                              const SizedBox(height: 24),
+
+                              // 🌑 Boîte assombrie pour faire ressortir les stats
+                              Container(
+                                margin: const EdgeInsets.symmetric(horizontal: 40),
+                                padding: const EdgeInsets.symmetric(vertical: 12),
+                                decoration: BoxDecoration(
+                                  // On passe d'un blanc transparent à un noir transparent
+                                  color: Colors.black.withValues(alpha: 0.25), 
+                                  borderRadius: BorderRadius.circular(20),
+                                  border: Border.all(color: Colors.white.withValues(alpha: 0.15)),
+                                ),
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                                  children: [
+                                    _buildGlassStat('POIDS', '${pokemonDetails!.weight / 10} kg', textShadows),
+                                    Container(height: 30, width: 1, color: Colors.white.withValues(alpha: 0.3)),
+                                    _buildGlassStat('TAILLE', '${pokemonDetails!.height / 10} m', textShadows),
+                                  ],
+                                ),
+                              ),
+                              const SizedBox(height: 30),
+                            ],
                           ),
-                          const SizedBox(height: 10),
-                          Text(
-                            // L'interface se contente d'afficher, elle ne calcule plus !
-                            pokemonDetails!.types.join(' / '),
-                            style: const TextStyle(
-                              fontSize: 22,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.amber,
-                            ),
-                          ),
-                          const SizedBox(height: 20),
-                          Text(
-                            'Poids : ${pokemonDetails!.weight} hg',
-                            style: const TextStyle(fontSize: 18),
-                          ),
-                          Text(
-                            'Taille : ${pokemonDetails!.height} dm',
-                            style: const TextStyle(fontSize: 18),
-                          ),
-                        ],
+                        ),
                       ),
-                    ),
+                      // Barre d'onglets épinglée
+                      SliverPersistentHeader(
+                        pinned: true,
+                        delegate: _SliverAppBarDelegate(
+                          TabBar(
+                            indicatorColor: Colors.white,
+                            indicatorWeight: 3,
+                            labelColor: Colors.white,
+                            unselectedLabelColor: Colors.white70,
+                            // On ajoute l'ombre directement dans le style des textes de la TabBar
+                            labelStyle: TextStyle(fontWeight: FontWeight.bold, shadows: textShadows),
+                            unselectedLabelStyle: TextStyle(fontWeight: FontWeight.normal, shadows: textShadows),
+                            tabs: const [
+                              Tab(text: 'FORMES'),
+                              Tab(text: 'INFOS'),
+                              Tab(text: 'COMBAT'),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ];
+                  },
+                  
+                  body: TabBarView(
+                    children: [
+                      GridView.builder(
+                        padding: const EdgeInsets.all(16),
+                        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                          crossAxisCount: 3,
+                          mainAxisSpacing: 10,
+                          crossAxisSpacing: 10,
+                          childAspectRatio: 0.8,
+                        ),
+                        itemCount: 6,
+                        itemBuilder: (context, index) {
+                          return Container(
+                            decoration: BoxDecoration(
+                              color: Colors.black.withValues(alpha: 0.2), // Grille assombrie
+                              borderRadius: BorderRadius.circular(12),
+                              border: Border.all(color: Colors.white.withValues(alpha: 0.1)),
+                            ),
+                            child: Center(
+                              child: Image.network(imageUrl, height: 60, color: index > 0 ? Colors.black45 : null),
+                            ),
+                          );
+                        },
+                      ),
+                      Center(child: Text('Infos du Pokémon', style: TextStyle(color: Colors.white, shadows: textShadows))),
+                      Center(child: Text('Stats de combat', style: TextStyle(color: Colors.white, shadows: textShadows))),
+                    ],
                   ),
-                ],
-              ),
+                ),
+        ),
       ),
     );
+  }
+
+  // J'ai mis à jour ton Helper pour y inclure l'ombre des textes
+  Widget _buildGlassStat(String label, String value, List<Shadow> textShadows) {
+    return Column(
+      children: [
+        Text(
+          label,
+          style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.white70, shadows: textShadows),
+        ),
+        const SizedBox(height: 4),
+        Text(
+          value,
+          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white, shadows: textShadows),
+        ),
+      ],
+    );
+  }
+}
+
+class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
+  _SliverAppBarDelegate(this._tabBar);
+
+  final TabBar _tabBar;
+
+  @override
+  double get minExtent => _tabBar.preferredSize.height;
+  @override
+  double get maxExtent => _tabBar.preferredSize.height;
+
+  @override
+  Widget build(BuildContext context, double shrinkOffset, bool overlapsContent) {
+    return Container(
+      color: overlapsContent ? Colors.black.withValues(alpha: 0.4) : Colors.transparent, // Plus sombre au scroll
+      child: _tabBar,
+    );
+  }
+
+  @override
+  bool shouldRebuild(_SliverAppBarDelegate oldDelegate) {
+    return false;
   }
 }
