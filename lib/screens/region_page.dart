@@ -112,6 +112,16 @@ class _RegionPage extends State<RegionPage> {
         'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/912.png',
       ],
     ),
+    Region(
+      name: 'all pokemons',
+      firstId: 1,
+      lastId: 1025,
+      starters: [
+        'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/133.png',
+        'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/25.png',
+        'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/6.png',
+      ],
+    ),
   ];
 
   @override

@@ -4,6 +4,7 @@ import 'dart:convert';
 
 import '../models/pokemon.dart';
 import '../models/pokemon_detail.dart';
+import '../models/pokemon_forms.dart';
 
 class PokeApiService {
   final http.Client client; 
@@ -35,5 +36,21 @@ class PokeApiService {
     } else {
       throw Exception('Erreur lors du chargement des détails');
     }
+  }
+
+  Future<List<PokemonForm>> fetchPokemonForm(int id) async {
+    final url = Uri.parse('https://pokeapi.co/api/v2/pokemon-species/$id');
+    final response = await http.get(url);
+
+    if (response.statusCode == 200 ){
+      final List varieties = jsonDecode(response.body)['varieties'];
+      final alternateForms = varieties.where((v) => v['is_default'] == false).toList();
+      
+      List<PokemonForm> forms = alternateForms.map((v) => PokemonForm.fromJson(v)).toList();
+      return forms; 
+    } else {
+      throw Exception('Erreur lors du chargement des formes');
+    }
+    
   }
 }

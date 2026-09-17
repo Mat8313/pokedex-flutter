@@ -1,10 +1,12 @@
 class PokemonDetail {
+  final int id;
   final int weight;
   final int height;
   final List<String> types;
   final Map<String, String?> sprites;
 
   PokemonDetail({
+    required this.id,
     required this.weight,
     required this.height,
     required this.types,
@@ -12,7 +14,6 @@ class PokemonDetail {
   });
 
   factory PokemonDetail.fromJson(Map<String, dynamic> json) {
-    // On fait le traitement complexe des types ici, côté "Data" !
     List<String> extractedTypes = (json['types'] as List)
         .map((t) => t['type']['name'].toString().toUpperCase())
         .toList();
@@ -24,11 +25,11 @@ class PokemonDetail {
     };
 
     return PokemonDetail(
+      id: json['id'],
       weight: json['weight'],
       height: json['height'],
       types: extractedTypes,
       sprites: spritesList,
-
     );
   }
 }
