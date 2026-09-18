@@ -1,0 +1,45 @@
+{
+    // Utilisez IntelliSense pour en savoir plus sur les attributs possibles.
+    // Pointez pour afficher la description des attributs existants.
+    // Pour plus d'informations, visitez : https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "pokedex",
+            "request": "launch",
+            "type": "dart"
+        },
+        {
+            "name": "pokedex (profile mode)",
+            "request": "launch",
+            "type": "dart",
+            "flutterMode": "profile"
+        },
+        {
+            "name": "pokedex (release mode)",
+            "request": "launch",
+            "type": "dart",
+            "flutterMode": "release"
+        },
+        {
+            "name": ".widget_preview",
+            "cwd": ".widget_preview",
+            "request": "launch",
+            "type": "dart"
+        },
+        {
+            "name": ".widget_preview (profile mode)",
+            "cwd": ".widget_preview",
+            "request": "launch",
+            "type": "dart",
+            "flutterMode": "profile"
+        },
+        {
+            "name": ".widget_preview (release mode)",
+            "cwd": ".widget_preview",
+            "request": "launch",
+            "type": "dart",
+            "flutterMode": "release"
+        }
+    ]
+}

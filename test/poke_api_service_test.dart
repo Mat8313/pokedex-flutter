@@ -70,7 +70,7 @@ void main() {
 
         final pokemonForms = await service.fetchPokemonForm(id);
         expect(pokemonForms[0].name, 'venusaur-mega');
-        expect(pokemonForms[0].url, 'https://pokeapi.co/api/v2/pokemon/10033/');
+        expect(pokemonForms[0].id, 10033);
       }
     );
   });

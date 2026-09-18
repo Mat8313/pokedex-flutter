@@ -117,9 +117,9 @@ class _RegionPage extends State<RegionPage> {
       firstId: 1,
       lastId: 1025,
       starters: [
-        'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/133.png',
+        'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/151.png',
         'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/25.png',
-        'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/6.png',
+        'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/150.png',
       ],
     ),
   ];
@@ -137,20 +137,15 @@ class _RegionPage extends State<RegionPage> {
         elevation: 0,
         centerTitle: true,
       ),
-
       body: ListView.builder(
-        // On ajoute un padding global pour la liste
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         itemCount: regions.length,
         itemBuilder: (context, index) {
           final region = regions[index];
 
           return Container(
-            margin: const EdgeInsets.only(
-              bottom: 16,
-            ), // Espace entre les cartes
+            margin: const EdgeInsets.only(bottom: 16),
             decoration: BoxDecoration(
-              // Un léger dégradé pour donner du relief à la carte
               gradient: const LinearGradient(
                 colors: [Color(0xFF2A2D34), Color(0xFF1E1E1E)],
                 begin: Alignment.topLeft,
@@ -165,7 +160,6 @@ class _RegionPage extends State<RegionPage> {
                 ),
               ],
             ),
-            // Material + InkWell permet d'avoir le bel effet de clic "vague"
             child: Material(
               color: Colors.transparent,
               child: InkWell(
@@ -187,61 +181,74 @@ class _RegionPage extends State<RegionPage> {
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      // --- GAUCHE : Textes ---
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            region.name.toUpperCase(),
-                            style: const TextStyle(
-                              fontWeight: FontWeight.w900,
-                              fontSize: 20,
-                              letterSpacing: 1.5,
-                              color: Colors.white,
-                            ),
-                          ),
-                          const SizedBox(height: 8),
-                          // Petit Badge pour les IDs
-                          Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 10,
-                              vertical: 4,
-                            ),
-                            decoration: BoxDecoration(
-                              color: Colors.black.withValues(alpha: 0.3),
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                            child: Text(
-                              '#${region.firstId.toString().padLeft(4, '0')} - #${region.lastId.toString().padLeft(4, '0')}',
-                              style: const TextStyle(
-                                fontWeight: FontWeight.bold,
-                                fontSize: 12,
-                                color: Colors.grey,
+                      Expanded(
+                        flex: 4, 
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            FittedBox(
+                              fit: BoxFit.scaleDown,
+                              alignment: Alignment.centerLeft,
+                              child: Text(
+                                region.name.toUpperCase(),
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.w900,
+                                  fontSize: 20,
+                                  letterSpacing: 1.5,
+                                  color: Colors.white,
+                                ),
                               ),
                             ),
-                          ),
-                        ],
+                            const SizedBox(height: 8),
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 10,
+                                vertical: 4,
+                              ),
+                              decoration: BoxDecoration(
+                                color: Colors.black.withValues(alpha: 0.3),
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              child: Text(
+                                '#${region.firstId.toString().padLeft(4, '0')} - #${region.lastId.toString().padLeft(4, '0')}',
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 12,
+                                  color: Colors.grey,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
+                      const SizedBox(width: 16),
 
-                      // --- DROITE : Les 3 Starters ---
-                      Row(
-                        children: [
-                          Image.network(
-                            region.starters[0],
-                            height: 80,
-                            width: 80,
+                      Expanded(
+                        flex: 6,
+                        child: FittedBox(
+                          fit: BoxFit.contain, // Demande de remplir l'espace au maximum
+                          alignment: Alignment.centerRight,
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Image.network(
+                                region.starters[0],
+                                height: 100,
+                                width: 100,
+                              ),
+                              Image.network(
+                                region.starters[1],
+                                height: 100,
+                                width: 100,
+                              ),
+                              Image.network(
+                                region.starters[2],
+                                height: 100,
+                                width: 100,
+                              ),
+                            ],
                           ),
-                          Image.network(
-                            region.starters[1],
-                            height: 80,
-                            width: 80,
-                          ),
-                          Image.network(
-                            region.starters[2],
-                            height: 80,
-                            width: 80,
-                          ),
-                        ],
+                        ),
                       ),
                     ],
                   ),

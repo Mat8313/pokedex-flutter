@@ -1,17 +1,21 @@
 class PokemonForm {
-  final String url;
+  final int id;
   final String name;
 
   PokemonForm({
+    required this.id,
     required this.name,
-    required this.url,
   });
 
   factory PokemonForm.fromJson(Map<String, dynamic> json, [int? provideId]) {
+    final data = json.containsKey('pokemon') ? json['pokemon'] : json;
+    
+    String urlString = data['url'];
+    int calculatedId = int.parse(urlString.split('/')[urlString.split('/').length - 2]);
 
     return PokemonForm(
-      name : json['pokemon']['name'],
-      url  : json['pokemon']['url'],
+      id: calculatedId,
+      name: data['name'],
     );
   }
 }
