@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import '../services/poke_api_service.dart';
 import '../models/pokemon_detail.dart';
 import '../models/pokemon_forms.dart';
+import '../models/sprite_set.dart';
 import '../utils/assets_helper.dart';
 
 final List<Shadow> _textShadows = [
@@ -44,6 +45,10 @@ class _PokemonDetailPageState extends State<PokemonDetailPage> {
   List<PokemonForm>? pokemonForms;
   List<PokemonForm>? pokemonTransformations;
   String? displayedCosmeticName;
+  // On mémorise la clé du jeu choisi, pas l'URL : l'image se recalcule ainsi
+  // toute seule quand les bascules shiny/sexe changent.
+  String? selectedGameKey;
+  String? formVersionGroup;
   bool isShiny = false;
   bool isFemale = false;
 
@@ -56,11 +61,29 @@ class _PokemonDetailPageState extends State<PokemonDetailPage> {
         pokemonDetails = details;
         displayedCosmeticName = null;
         // Le shiny suit le Pokémon d'une forme à l'autre, le sexe non :
-        // toutes les formes n'ont pas de variante femelle.
+        // toutes les formes n'ont pas de variante femelle. Idem pour le jeu
+        // choisi, une méga n'existe pas dans les jeux anciens.
+        selectedGameKey = null;
+        formVersionGroup = null;
         isFemale = false;
       });
+      fetchFormVersionGroup(details);
     } catch (e) {
       debugPrint('ERREUR réseau: $e');
+    }
+  }
+
+  /// Date la forme affichée pour pouvoir masquer les sprites de jeux antérieurs.
+  /// En cas d'échec on ne filtre rien : mieux vaut trop de sprites que pas d'onglet.
+  Future<void> fetchFormVersionGroup(PokemonDetail details) async {
+    if (details.cosmeticSprite.isEmpty) return;
+
+    try {
+      final versionGroup = await apiService.fetchFormVersionGroup(details.cosmeticSprite.first.id);
+      if (!mounted || pokemonDetails?.id != details.id) return;
+      setState(() => formVersionGroup = versionGroup);
+    } catch (e) {
+      debugPrint('ERREUR réseau : $e');
     }
   }
 
@@ -112,6 +135,19 @@ class _PokemonDetailPageState extends State<PokemonDetailPage> {
     ];
   }
 
+  String? get selectedGameSpriteUrl {
+    if (selectedGameKey == null || pokemonDetails == null) return null;
+
+    for (final generation in pokemonDetails!.spritesByGeneration) {
+      for (final gameSprites in generation.games) {
+        if (gameSprites.game.spriteKey == selectedGameKey) {
+          return gameSprites.sprites.variant(shiny: isShiny, female: isFemale);
+        }
+      }
+    }
+    return null;
+  }
+
   List<String> cosmeticUrlCandidates(String name) => [
     'https://img.pokemondb.net/sprites/home/${isShiny ? 'shiny' : 'normal'}/$name.png',
     if (isShiny) 'https://img.pokemondb.net/sprites/home/normal/$name.png',
@@ -130,7 +166,10 @@ class _PokemonDetailPageState extends State<PokemonDetailPage> {
   Widget build(BuildContext context) {
     final currentBaseId = pokemonDetails?.id ?? widget.pokemonId;
 
-    final mainImageUrls = displayedCosmeticName != null
+    final gameSpriteUrl = selectedGameSpriteUrl;
+    final mainImageUrls = gameSpriteUrl != null
+        ? [gameSpriteUrl, ...spriteUrlCandidates(currentBaseId)]
+        : displayedCosmeticName != null
         ? cosmeticUrlCandidates(displayedCosmeticName!)
         : spriteUrlCandidates(currentBaseId);
 
@@ -143,8 +182,8 @@ class _PokemonDetailPageState extends State<PokemonDetailPage> {
 
     // Les formes alternatives n'ont pas toutes de variante : on grise le bouton
     // plutôt que de laisser cliquer vers un sprite inexistant.
-    final hasFemaleSprite = pokemonDetails?.sprites['female'] != null;
-    final hasShinySprite = pokemonDetails?.sprites['shiny'] != null;
+    final hasFemaleSprite = pokemonDetails?.sprites.frontFemale != null;
+    final hasShinySprite = pokemonDetails?.sprites.frontShiny != null;
 
     final megaForms =
         pokemonTransformations?.where((form) => form.name.contains('mega')).toList() ?? [];
@@ -198,6 +237,11 @@ class _PokemonDetailPageState extends State<PokemonDetailPage> {
                                 child: _FallbackNetworkImage(
                                   urls: mainImageUrls,
                                   height: 200,
+                                  // Les sprites de jeu sont du pixel art : sans
+                                  // ça, l'agrandissement les rend flous.
+                                  filterQuality: gameSpriteUrl != null
+                                      ? FilterQuality.none
+                                      : FilterQuality.medium,
                                   fallback: const Icon(
                                     Icons.catching_pokemon,
                                     size: 100,
@@ -328,8 +372,10 @@ class _PokemonDetailPageState extends State<PokemonDetailPage> {
                                       fallbackImageUrl:
                                           'https://img.pokemondb.net/sprites/black-white/normal/${cosmetic.name}.png',
                                       isSelected: displayedCosmeticName == cosmetic.name,
-                                      onTap: () =>
-                                          setState(() => displayedCosmeticName = cosmetic.name),
+                                      onTap: () => setState(() {
+                                        displayedCosmeticName = cosmetic.name;
+                                        selectedGameKey = null;
+                                      }),
                                     );
                                   }).toList(),
                                 ),
@@ -429,11 +475,19 @@ class _PokemonDetailPageState extends State<PokemonDetailPage> {
                   // =========================================================================
                   body: TabBarView(
                     children: [
-                      Center(
-                        child: Text(
-                          'Onglet Sprites (À faire)',
-                          style: TextStyle(color: Colors.white, shadows: _textShadows),
+                      _SpritesTab(
+                        generations: spritesSinceVersionGroup(
+                          pokemonDetails!.spritesByGeneration,
+                          formVersionGroup,
                         ),
+                        isShiny: isShiny,
+                        isFemale: isFemale,
+                        selectedGameKey: selectedGameKey,
+                        onSelect: (gameKey) => setState(() {
+                          // Un second appui revient au rendu par défaut.
+                          selectedGameKey = selectedGameKey == gameKey ? null : gameKey;
+                          displayedCosmeticName = null;
+                        }),
                       ),
                       Center(
                         child: Text(
@@ -456,14 +510,146 @@ class _PokemonDetailPageState extends State<PokemonDetailPage> {
   }
 }
 
+class _SpritesTab extends StatelessWidget {
+  const _SpritesTab({
+    required this.generations,
+    required this.isShiny,
+    required this.isFemale,
+    required this.selectedGameKey,
+    required this.onSelect,
+  });
+
+  final List<GenerationSprites> generations;
+  final bool isShiny;
+  final bool isFemale;
+  final String? selectedGameKey;
+  final void Function(String gameKey) onSelect;
+
+  @override
+  Widget build(BuildContext context) {
+    if (generations.isEmpty) {
+      return Center(
+        child: Text(
+          'Aucun sprite de jeu pour cette forme',
+          style: TextStyle(color: Colors.white70, shadows: _textShadows),
+        ),
+      );
+    }
+
+    return ListView(
+      padding: const EdgeInsets.fromLTRB(16, 20, 16, 40),
+      children: [
+        for (final generation in generations) ...[
+          Padding(
+            padding: const EdgeInsets.only(bottom: 12),
+            child: Text(
+              generation.generation.label.toUpperCase(),
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 13,
+                fontWeight: FontWeight.w900,
+                letterSpacing: 1.5,
+                shadows: _textShadows,
+              ),
+            ),
+          ),
+          Wrap(
+            spacing: 12,
+            runSpacing: 12,
+            children: [
+              for (final gameSprites in generation.games)
+                _GameSpriteTile(
+                  label: gameSprites.game.label,
+                  imageUrl: gameSprites.sprites.variant(shiny: isShiny, female: isFemale)!,
+                  isSelected: selectedGameKey == gameSprites.game.spriteKey,
+                  onTap: () => onSelect(gameSprites.game.spriteKey),
+                ),
+            ],
+          ),
+          const SizedBox(height: 28),
+        ],
+      ],
+    );
+  }
+}
+
+class _GameSpriteTile extends StatelessWidget {
+  const _GameSpriteTile({
+    required this.label,
+    required this.imageUrl,
+    required this.isSelected,
+    required this.onTap,
+  });
+
+  final String label;
+  final String imageUrl;
+  final bool isSelected;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        width: 104,
+        padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 4),
+        decoration: BoxDecoration(
+          color: Colors.black.withValues(alpha: isSelected ? 0.4 : 0.2),
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(
+            color: isSelected ? Colors.white : Colors.white.withValues(alpha: 0.15),
+            width: isSelected ? 2.0 : 1.0,
+          ),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            SizedBox(
+              height: 64,
+              // Pixel art : pas de lissage, sinon l'agrandissement le rend flou.
+              child: Image.network(
+                imageUrl,
+                fit: BoxFit.contain,
+                filterQuality: FilterQuality.none,
+                errorBuilder: (context, error, stackTrace) =>
+                    const Icon(Icons.image_not_supported, color: Colors.white54),
+              ),
+            ),
+            const SizedBox(height: 6),
+            Text(
+              label,
+              textAlign: TextAlign.center,
+              maxLines: 3,
+              overflow: TextOverflow.ellipsis,
+              style: TextStyle(
+                fontSize: 9,
+                fontWeight: FontWeight.bold,
+                color: Colors.white,
+                height: 1.2,
+                shadows: _textShadows,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
 // Essaie les URL dans l'ordre : chaque échec relance le widget avec la suite de
 // la liste, jusqu'au widget de repli si plus rien ne charge.
 class _FallbackNetworkImage extends StatelessWidget {
-  const _FallbackNetworkImage({required this.urls, required this.fallback, this.height});
+  const _FallbackNetworkImage({
+    required this.urls,
+    required this.fallback,
+    this.height,
+    this.filterQuality = FilterQuality.medium,
+  });
 
   final List<String> urls;
   final Widget fallback;
   final double? height;
+  final FilterQuality filterQuality;
 
   @override
   Widget build(BuildContext context) {
@@ -473,8 +659,13 @@ class _FallbackNetworkImage extends StatelessWidget {
       urls.first,
       height: height,
       fit: BoxFit.contain,
-      errorBuilder: (context, error, stackTrace) =>
-          _FallbackNetworkImage(urls: urls.sublist(1), fallback: fallback, height: height),
+      filterQuality: filterQuality,
+      errorBuilder: (context, error, stackTrace) => _FallbackNetworkImage(
+        urls: urls.sublist(1),
+        fallback: fallback,
+        height: height,
+        filterQuality: filterQuality,
+      ),
     );
   }
 }

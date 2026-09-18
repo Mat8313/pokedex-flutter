@@ -55,6 +55,21 @@ class PokeApiService {
     
   }
 
+  /// Version-group qui a introduit la forme, pour dater ses sprites.
+  /// L'id attendu est celui de `/pokemon-form`, qui n'est pas celui de
+  /// `/pokemon` : il se lit dans le champ `forms` du détail d'un Pokémon.
+  Future<String?> fetchFormVersionGroup(int formId) async {
+    final url = Uri.parse('https://pokeapi.co/api/v2/pokemon-form/$formId');
+    final response = await client.get(url);
+
+    if (response.statusCode == 200) {
+      final versionGroup = jsonDecode(response.body)['version_group'];
+      return versionGroup == null ? null : versionGroup['name'] as String?;
+    } else {
+      throw Exception('Erreur lors du chargement de la forme');
+    }
+  }
+
   Future<List<PokemonForm>> fetchPokemonTransformation(int id) async {
     final url = Uri.parse('https://pokeapi.co/api/v2/pokemon-species/$id');
     final response = await client.get(url);

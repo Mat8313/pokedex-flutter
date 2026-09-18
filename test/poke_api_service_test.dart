@@ -86,6 +86,23 @@ void main() {
     );
 
     test(
+      'Doit récupérer le jeu qui a introduit une forme',
+      () async {
+        MockHttpClient fakeClient = MockHttpClient();
+        int formId = 10364;
+        final url = Uri.parse('https://pokeapi.co/api/v2/pokemon-form/$formId');
+        http.Response fakeResponse = http.Response(
+          '{"name": "venusaur-gmax", "version_group": {"name": "sword-shield"}}',
+          200,
+        );
+        when(() => fakeClient.get(url)).thenAnswer((_) async => fakeResponse);
+        final service = PokeApiService(client: fakeClient);
+
+        expect(await service.fetchFormVersionGroup(formId), 'sword-shield');
+      },
+    );
+
+    test(
       'Doit récupérer uniquement les formes mega et gmax',
       () async {
         MockHttpClient fakeClient = MockHttpClient();

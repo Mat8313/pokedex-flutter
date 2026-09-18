@@ -1,5 +1,5 @@
-//import 'dart:js_interop';
 import 'pokemon_forms.dart';
+import 'sprite_set.dart';
 
 class PokemonDetail {
   final int id;
@@ -7,9 +7,9 @@ class PokemonDetail {
   final int weight;
   final int height;
   final List<String> types;
-  final Map<String, String?> sprites;
+  final SpriteSet sprites;
   final List<PokemonForm> cosmeticSprite;
-
+  final List<GenerationSprites> spritesByGeneration;
 
   PokemonDetail({
     required this.id,
@@ -19,22 +19,19 @@ class PokemonDetail {
     required this.types,
     required this.sprites,
     required this.cosmeticSprite,
+    required this.spritesByGeneration,
   });
 
   factory PokemonDetail.fromJson(Map<String, dynamic> json) {
     List<String> extractedTypes = (json['types'] as List)
         .map((t) => t['type']['name'].toString().toUpperCase())
         .toList();
-    Map<String, String?> spritesList = {
-      'default'        : (json['sprites']['front_default'] as String?),
-      'shiny'          : (json['sprites']['front_shiny'] as String?),
-      'female'         : (json['sprites']['front_female'] as String?),
-      'shiny female'   : (json['sprites']['front_shiny_female'] as String?),
-    };
+
+    final spritesJson = json['sprites'] as Map<String, dynamic>;
 
     List<PokemonForm> cosmeticSpriteList = (json['forms'] as List)
-      .map((e) => PokemonForm.fromJson(e)).toList();
-
+        .map((e) => PokemonForm.fromJson(e))
+        .toList();
 
     return PokemonDetail(
       id: json['id'],
@@ -42,8 +39,11 @@ class PokemonDetail {
       weight: json['weight'],
       height: json['height'],
       types: extractedTypes,
-      sprites: spritesList,
+      sprites: SpriteSet.fromJson(spritesJson),
       cosmeticSprite: cosmeticSpriteList,
+      spritesByGeneration: parseSpritesByGeneration(
+        spritesJson['versions'] as Map<String, dynamic>?,
+      ),
     );
   }
 }
