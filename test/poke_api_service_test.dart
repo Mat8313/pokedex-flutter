@@ -41,7 +41,10 @@ void main() {
         int id = 1;
         final url = Uri.parse('https://pokeapi.co/api/v2/pokemon/$id');
         http.Response fakeResponse = http.Response(
-          '{"height": 7, "weight": 69, "types": [{"type": {"name": "grass"}}, {"type": {"name": "poison"}}]}',
+          '{"id": 1, "name": "bulbasaur", "height": 7, "weight": 69, '
+          '"types": [{"type": {"name": "grass"}}, {"type": {"name": "poison"}}], '
+          '"sprites": {"front_default": "default.png", "front_shiny": null, "front_female": null, "front_shiny_female": null}, '
+          '"forms": [{"name": "bulbasaur", "url": "https://pokeapi.co/api/v2/pokemon-form/1/"}]}',
           200,
         );
         when(() => fakeClient.get(url)).thenAnswer((_) async => fakeResponse);
@@ -57,21 +60,54 @@ void main() {
     );
 
     test(
-      'Doit Récuperer les détail d\'une forme et ces sprites',
+      'Doit garder les formes alternatives classiques et exclure les mega/gmax',
       () async {
         MockHttpClient fakeClient = MockHttpClient();
-        int id = 3; 
+        int id = 3;
         final url = Uri.parse('https://pokeapi.co/api/v2/pokemon-species/$id');
         http.Response fakeResponse = http.Response(
-          '{"varieties": [{"is_default": true,"pokemon": {"name": "venusaur","url": "https://pokeapi.co/api/v2/pokemon/3/"}}, {"is_default": false, "pokemon": { "name": "venusaur-mega","url": "https://pokeapi.co/api/v2/pokemon/10033/"}}]}'
-          ,200);
+          '{"varieties": ['
+          '{"is_default": true, "pokemon": {"name": "venusaur", "url": "https://pokeapi.co/api/v2/pokemon/3/"}}, '
+          '{"is_default": false, "pokemon": {"name": "venusaur-mega", "url": "https://pokeapi.co/api/v2/pokemon/10033/"}}, '
+          '{"is_default": false, "pokemon": {"name": "venusaur-gmax", "url": "https://pokeapi.co/api/v2/pokemon/10195/"}}, '
+          '{"is_default": false, "pokemon": {"name": "venusaur-alt", "url": "https://pokeapi.co/api/v2/pokemon/10222/"}}'
+          ']}',
+          200,
+        );
         when(() => fakeClient.get(url)).thenAnswer((_) async => fakeResponse);
-        final service = PokeApiService(client: fakeClient); 
+        final service = PokeApiService(client: fakeClient);
 
         final pokemonForms = await service.fetchPokemonForm(id);
-        expect(pokemonForms[0].name, 'venusaur-mega');
-        expect(pokemonForms[0].id, 10033);
-      }
+
+        expect(pokemonForms.length, 1);
+        expect(pokemonForms[0].name, 'venusaur-alt');
+        expect(pokemonForms[0].id, 10222);
+      },
+    );
+
+    test(
+      'Doit récupérer uniquement les formes mega et gmax',
+      () async {
+        MockHttpClient fakeClient = MockHttpClient();
+        int id = 3;
+        final url = Uri.parse('https://pokeapi.co/api/v2/pokemon-species/$id');
+        http.Response fakeResponse = http.Response(
+          '{"varieties": ['
+          '{"is_default": true, "pokemon": {"name": "venusaur", "url": "https://pokeapi.co/api/v2/pokemon/3/"}}, '
+          '{"is_default": false, "pokemon": {"name": "venusaur-mega", "url": "https://pokeapi.co/api/v2/pokemon/10033/"}}, '
+          '{"is_default": false, "pokemon": {"name": "venusaur-gmax", "url": "https://pokeapi.co/api/v2/pokemon/10195/"}}, '
+          '{"is_default": false, "pokemon": {"name": "venusaur-alt", "url": "https://pokeapi.co/api/v2/pokemon/10222/"}}'
+          ']}',
+          200,
+        );
+        when(() => fakeClient.get(url)).thenAnswer((_) async => fakeResponse);
+        final service = PokeApiService(client: fakeClient);
+
+        final transformations = await service.fetchPokemonTransformation(id);
+
+        expect(transformations.length, 2);
+        expect(transformations.map((f) => f.name), containsAll(['venusaur-mega', 'venusaur-gmax']));
+      },
     );
   });
 }

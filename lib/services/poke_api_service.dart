@@ -29,7 +29,7 @@ class PokeApiService {
   // Méthode pour récupérer les détails via l'ID.
   Future<PokemonDetail> fetchPokemonDetails(int id) async {
     final url = Uri.parse('https://pokeapi.co/api/v2/pokemon/$id');
-    final response = await http.get(url);
+    final response = await client.get(url);
 
     if (response.statusCode == 200) {
       return PokemonDetail.fromJson(jsonDecode(response.body));
@@ -40,13 +40,31 @@ class PokeApiService {
 
   Future<List<PokemonForm>> fetchPokemonForm(int id) async {
     final url = Uri.parse('https://pokeapi.co/api/v2/pokemon-species/$id');
-    final response = await http.get(url);
+    final response = await client.get(url);
 
     if (response.statusCode == 200 ){
       final List varieties = jsonDecode(response.body)['varieties'];
-      final alternateForms = varieties.where((v) => v['is_default'] == false).toList();
+      final alternateForms = varieties.where((v) => v['is_default'] == false && !(v['pokemon']['name'].contains('mega') || v['pokemon']['name'].contains('gmax'))).toList();
+
       
       List<PokemonForm> forms = alternateForms.map((v) => PokemonForm.fromJson(v)).toList();
+      return forms; 
+    } else {
+      throw Exception('Erreur lors du chargement des formes');
+    }
+    
+  }
+
+  Future<List<PokemonForm>> fetchPokemonTransformation(int id) async {
+    final url = Uri.parse('https://pokeapi.co/api/v2/pokemon-species/$id');
+    final response = await client.get(url);
+
+    if (response.statusCode == 200 ){
+      final List varieties = jsonDecode(response.body)['varieties'];
+      final transformationForm = varieties.where((v) => v['is_default'] == false && (v['pokemon']['name'].contains('mega') || v['pokemon']['name'].contains('gmax'))).toList();
+      
+      
+      List<PokemonForm> forms = transformationForm.map((v) => PokemonForm.fromJson(v)).toList();
       return forms; 
     } else {
       throw Exception('Erreur lors du chargement des formes');

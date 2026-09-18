@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import 'screens/Region_page.dart';
+import 'screens/region_page.dart';
 
 void main() {
   runApp(const PokedexApp());

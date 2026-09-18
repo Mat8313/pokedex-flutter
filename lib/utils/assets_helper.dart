@@ -40,3 +40,8 @@ const Map<String, String> typeBackgrounds = {
   'STEEL': 'assets/background/Fond_Type_Acier_GO.png',
   'FAIRY': 'assets/background/Fond_Type_Fée_GO.png',
 };
+
+const Map<String, String> transformationIcons = {
+  'Mega': 'assets/icons/Mega_Evolution_Icon.png',
+  'Gigamax': 'assets/icons/Dynamax_Icon.png',
+};

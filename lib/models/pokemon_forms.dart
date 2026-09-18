@@ -13,6 +13,7 @@ class PokemonForm {
     String urlString = data['url'];
     int calculatedId = int.parse(urlString.split('/')[urlString.split('/').length - 2]);
 
+
     return PokemonForm(
       id: calculatedId,
       name: data['name'],

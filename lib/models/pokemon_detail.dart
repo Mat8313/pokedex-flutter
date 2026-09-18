@@ -35,6 +35,7 @@ class PokemonDetail {
     List<PokemonForm> cosmeticSpriteList = (json['forms'] as List)
       .map((e) => PokemonForm.fromJson(e)).toList();
 
+
     return PokemonDetail(
       id: json['id'],
       name: json['name'],
