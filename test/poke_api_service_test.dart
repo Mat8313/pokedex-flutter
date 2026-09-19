@@ -43,6 +43,12 @@ void main() {
       http.Response fakeResponse = http.Response(
         '{"id": 1, "name": "bulbasaur", "height": 7, "weight": 69, '
         '"types": [{"type": {"name": "grass"}}, {"type": {"name": "poison"}}], '
+        '"stats": [{"base_stat": 45, "stat": {"name": "hp"}}, '
+        '{"base_stat": 49, "stat": {"name": "attack"}}], '
+        '"abilities": [{"is_hidden": false, "ability": '
+        '{"name": "overgrow", "url": "https://pokeapi.co/api/v2/ability/65/"}}, '
+        '{"is_hidden": true, "ability": '
+        '{"name": "chlorophyll", "url": "https://pokeapi.co/api/v2/ability/34/"}}], '
         '"sprites": {"front_default": "default.png", "front_shiny": null, "front_female": null, "front_shiny_female": null}, '
         '"forms": [{"name": "bulbasaur", "url": "https://pokeapi.co/api/v2/pokemon-form/1/"}]}',
         200,
@@ -56,6 +62,11 @@ void main() {
       expect(firstPokemon.height, 7);
       expect(firstPokemon.weight, 69);
       expect(firstPokemon.types, ['GRASS', 'POISON']);
+      expect(firstPokemon.stats['hp'], 45);
+      expect(firstPokemon.abilities.length, 2);
+      // L'id du talent se lit dans son URL, l'API ne le donne pas autrement.
+      expect(firstPokemon.abilities.last.id, 34);
+      expect(firstPokemon.abilities.last.isHidden, isTrue);
     });
 
     test(

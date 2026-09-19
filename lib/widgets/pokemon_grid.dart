@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../models/pokedex_entry.dart';
 import '../screens/pokemon_detail_page.dart';
-import '../services/species_names.dart';
+import '../services/api_names.dart';
 import '../settings/app_settings.dart';
 import '../theme/app_theme.dart';
 

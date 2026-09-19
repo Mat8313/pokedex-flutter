@@ -6,6 +6,7 @@ import '../models/pokemon.dart';
 import '../models/pokemon_detail.dart';
 import '../models/pokemon_forms.dart';
 import '../models/pokedex_entry.dart';
+import '../models/pokemon_species.dart';
 
 class PokeApiService {
   final http.Client client;
@@ -120,6 +121,31 @@ class PokeApiService {
         ..sort((a, b) => a.entryNumber.compareTo(b.entryNumber));
     } else {
       throw Exception('Erreur lors du chargement du Pokédex $pokedexName');
+    }
+  }
+
+  /// Les informations d'espèce : catégorie, description, groupes d'œufs, et le
+  /// lien vers la chaîne d'évolution.
+  Future<PokemonSpecies> fetchPokemonSpecies(int speciesId) async {
+    final url = Uri.parse('https://pokeapi.co/api/v2/pokemon-species/$speciesId');
+    final response = await client.get(url);
+
+    if (response.statusCode == 200) {
+      return PokemonSpecies.fromJson(jsonDecode(response.body));
+    } else {
+      throw Exception("Erreur lors du chargement de l'espece");
+    }
+  }
+
+  /// La chaîne d'évolution complète, depuis la forme de base.
+  Future<EvolutionNode> fetchEvolutionChain(int chainId) async {
+    final url = Uri.parse('https://pokeapi.co/api/v2/evolution-chain/$chainId');
+    final response = await client.get(url);
+
+    if (response.statusCode == 200) {
+      return EvolutionNode.fromJson(jsonDecode(response.body)['chain']);
+    } else {
+      throw Exception("Erreur lors du chargement de la chaîne d'évolution");
     }
   }
 }

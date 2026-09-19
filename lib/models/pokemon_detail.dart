@@ -11,6 +11,11 @@ class PokemonDetail {
   final List<PokemonForm> cosmeticSprite;
   final List<GenerationSprites> spritesByGeneration;
 
+  /// Clé d'API de la statistique (`hp`, `special-attack`…) → valeur de base.
+  final Map<String, int> stats;
+
+  final List<PokemonAbility> abilities;
+
   PokemonDetail({
     required this.id,
     required this.name,
@@ -20,6 +25,8 @@ class PokemonDetail {
     required this.sprites,
     required this.cosmeticSprite,
     required this.spritesByGeneration,
+    required this.stats,
+    required this.abilities,
   });
 
   factory PokemonDetail.fromJson(Map<String, dynamic> json) {
@@ -44,6 +51,36 @@ class PokemonDetail {
       spritesByGeneration: parseSpritesByGeneration(
         spritesJson['versions'] as Map<String, dynamic>?,
       ),
+      // Tolerants : ces deux champs n'ont ete lus qu'a partir des onglets
+      // Infos et Combat, et un appelant plus ancien peut les ignorer.
+      stats: {
+        for (final stat in (json['stats'] as List? ?? const []))
+          stat['stat']['name'] as String: stat['base_stat'] as int,
+      },
+      abilities: [
+        for (final ability in (json['abilities'] as List? ?? const []))
+          PokemonAbility.fromJson(ability),
+      ],
+    );
+  }
+}
+
+/// Un talent du Pokémon. Le nom n'est pas dans la réponse : l'API ne donne que
+/// son identifiant, le libellé traduit se lit dans `ApiNames`.
+class PokemonAbility {
+  final int id;
+  final String apiName;
+  final bool isHidden;
+
+  const PokemonAbility({required this.id, required this.apiName, required this.isHidden});
+
+  factory PokemonAbility.fromJson(Map<String, dynamic> json) {
+    final url = json['ability']['url'] as String;
+
+    return PokemonAbility(
+      id: int.parse(url.split('/').where((part) => part.isNotEmpty).last),
+      apiName: json['ability']['name'] as String,
+      isHidden: json['is_hidden'] as bool,
     );
   }
 }

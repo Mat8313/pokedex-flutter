@@ -3,7 +3,12 @@ import 'dart:ui';
 
 import 'package:flutter/material.dart';
 
-import '../services/species_names.dart';
+import '../l10n/app_localizations.dart';
+import '../models/pokemon_species.dart';
+import '../services/api_names.dart';
+import '../widgets/detail/battle_tab.dart';
+import '../widgets/detail/evolution_tab.dart';
+import '../widgets/detail/info_tab.dart';
 import '../settings/app_settings.dart';
 
 import '../l10n/localized_label.dart';
@@ -15,7 +20,11 @@ import '../models/sprite_set.dart';
 import '../utils/assets_helper.dart';
 
 final List<Shadow> _textShadows = [
-  Shadow(offset: const Offset(1, 1), blurRadius: 5.0, color: Colors.black.withValues(alpha: 0.6)),
+  Shadow(
+    offset: const Offset(1, 1),
+    blurRadius: 5.0,
+    color: Colors.black.withValues(alpha: 0.6),
+  ),
 ];
 
 const List<Color> _megaGlowColors = [
@@ -39,7 +48,11 @@ class PokemonDetailPage extends StatefulWidget {
   final String pokemonName;
   final int pokemonId;
 
-  const PokemonDetailPage({super.key, required this.pokemonName, required this.pokemonId});
+  const PokemonDetailPage({
+    super.key,
+    required this.pokemonName,
+    required this.pokemonId,
+  });
 
   @override
   State<PokemonDetailPage> createState() => _PokemonDetailPageState();
@@ -49,11 +62,14 @@ class _PokemonDetailPageState extends State<PokemonDetailPage> {
   PokemonDetail? pokemonDetails;
   List<PokemonForm>? pokemonForms;
   List<PokemonForm>? pokemonTransformations;
+  PokemonSpecies? species;
+  EvolutionNode? evolutionChain;
   String? displayedCosmeticName;
   // On mémorise la clé du jeu choisi, pas l'URL : l'image se recalcule ainsi
   // toute seule quand les bascules shiny/sexe changent.
   String? selectedGameKey;
   String? formVersionGroup;
+
   /// Initialisé dans [didChangeDependencies] depuis le réglage
   /// « chromatique par défaut », que l'on ne peut pas lire dans [initState].
   bool isShiny = false;
@@ -87,7 +103,9 @@ class _PokemonDetailPageState extends State<PokemonDetailPage> {
     if (details.cosmeticSprite.isEmpty) return;
 
     try {
-      final versionGroup = await apiService.fetchFormVersionGroup(details.cosmeticSprite.first.id);
+      final versionGroup = await apiService.fetchFormVersionGroup(
+        details.cosmeticSprite.first.id,
+      );
       if (!mounted || pokemonDetails?.id != details.id) return;
       setState(() => formVersionGroup = versionGroup);
     } catch (e) {
@@ -119,12 +137,14 @@ class _PokemonDetailPageState extends State<PokemonDetailPage> {
 
   // Un second appui sur la forme déjà affichée revient au Pokémon de base.
   void showForm(int formId) {
-    final isAlreadyDisplayed = (pokemonDetails?.id ?? widget.pokemonId) == formId;
+    final isAlreadyDisplayed =
+        (pokemonDetails?.id ?? widget.pokemonId) == formId;
     fetchPokemonDetails(isAlreadyDisplayed ? widget.pokemonId : formId);
   }
 
   // 'charizard-mega-x' -> 'X'. Sert à distinguer plusieurs formes d'une même transformation.
-  String transformationSuffix(PokemonForm form) => form.name.split('-').last.toUpperCase();
+  String transformationSuffix(PokemonForm form) =>
+      form.name.split('-').last.toUpperCase();
 
   static const String _spritesRoot =
       'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon';
@@ -162,13 +182,34 @@ class _PokemonDetailPageState extends State<PokemonDetailPage> {
     'https://img.pokemondb.net/sprites/black-white/normal/$name.png',
   ];
 
+  /// L'espèce porte le lien vers la chaîne d'évolution : les deux appels sont
+  /// donc enchaînés, et la fiche s'affiche sans attendre qu'ils aboutissent.
+  Future<void> fetchSpeciesAndEvolutions(int speciesId) async {
+    try {
+      final loaded = await apiService.fetchPokemonSpecies(speciesId);
+      if (!mounted) return;
+      setState(() => species = loaded);
+
+      final chainId = loaded.evolutionChainId;
+      if (chainId == null) return;
+
+      final chain = await apiService.fetchEvolutionChain(chainId);
+      if (!mounted) return;
+      setState(() => evolutionChain = chain);
+    } catch (e) {
+      debugPrint('ERREUR réseau : $e');
+    }
+  }
+
   @override
   void initState() {
     super.initState();
     fetchPokemonDetails(widget.pokemonId);
     fetchPokemonForm(widget.pokemonId);
     fetchPokemonTransformation(widget.pokemonId);
+    fetchSpeciesAndEvolutions(widget.pokemonId);
   }
+
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
@@ -179,7 +220,6 @@ class _PokemonDetailPageState extends State<PokemonDetailPage> {
     _shinyInitialised = true;
     isShiny = context.settings.shinyByDefault;
   }
-
 
   @override
   Widget build(BuildContext context) {
@@ -192,12 +232,13 @@ class _PokemonDetailPageState extends State<PokemonDetailPage> {
         ? cosmeticUrlCandidates(displayedCosmeticName!)
         : spriteUrlCandidates(currentBaseId);
 
-    final rawName = displayedCosmeticName ?? pokemonDetails?.name ?? widget.pokemonName;
+    final rawName =
+        displayedCosmeticName ?? pokemonDetails?.name ?? widget.pokemonName;
     // Seule l'espèce de base a un nom traduit : une forme (`raichu-alola`)
     // n'en a pas, on se rabat alors sur son identifiant mis en forme.
     final displayName = rawName == widget.pokemonName
         ? context.speciesName(widget.pokemonId, rawName)
-        : SpeciesNames.prettify(rawName);
+        : ApiNames.prettify(rawName);
 
     String bgPath = 'assets/background/Fond_Type_Normal_GO.png';
     if (pokemonDetails != null && pokemonDetails!.types.isNotEmpty) {
@@ -210,12 +251,18 @@ class _PokemonDetailPageState extends State<PokemonDetailPage> {
     final hasShinySprite = pokemonDetails?.sprites.frontShiny != null;
 
     final megaForms =
-        pokemonTransformations?.where((form) => form.name.contains('mega')).toList() ?? [];
+        pokemonTransformations
+            ?.where((form) => form.name.contains('mega'))
+            .toList() ??
+        [];
     final gmaxForms =
-        pokemonTransformations?.where((form) => form.name.contains('gmax')).toList() ?? [];
+        pokemonTransformations
+            ?.where((form) => form.name.contains('gmax'))
+            .toList() ??
+        [];
 
     return DefaultTabController(
-      length: 3,
+      length: 4,
       child: Scaffold(
         extendBodyBehindAppBar: true,
 
@@ -239,10 +286,15 @@ class _PokemonDetailPageState extends State<PokemonDetailPage> {
           width: double.infinity,
           height: double.infinity,
           decoration: BoxDecoration(
-            image: DecorationImage(image: AssetImage(bgPath), fit: BoxFit.cover),
+            image: DecorationImage(
+              image: AssetImage(bgPath),
+              fit: BoxFit.cover,
+            ),
           ),
           child: pokemonDetails == null
-              ? const Center(child: CircularProgressIndicator(color: Colors.white))
+              ? const Center(
+                  child: CircularProgressIndicator(color: Colors.white),
+                )
               : NestedScrollView(
                   headerSliverBuilder: (context, innerBoxIsScrolled) {
                     return [
@@ -279,7 +331,9 @@ class _PokemonDetailPageState extends State<PokemonDetailPage> {
                               // NOM ET ID
                               // =========================================================================
                               Padding(
-                                padding: const EdgeInsets.symmetric(horizontal: 24.0),
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 24.0,
+                                ),
                                 child: FittedBox(
                                   fit: BoxFit.scaleDown,
                                   child: Row(
@@ -320,13 +374,17 @@ class _PokemonDetailPageState extends State<PokemonDetailPage> {
                                   SizedBox(
                                     width: 32,
                                     child: _MiniToggleButton(
-                                      icon: isFemale ? Icons.female : Icons.male,
+                                      icon: isFemale
+                                          ? Icons.female
+                                          : Icons.male,
                                       activeColor: isFemale
                                           ? const Color(0xFFFF6BAA)
                                           : const Color(0xFF64B5F6),
                                       isActive: hasFemaleSprite,
                                       onTap: hasFemaleSprite
-                                          ? () => setState(() => isFemale = !isFemale)
+                                          ? () => setState(
+                                              () => isFemale = !isFemale,
+                                            )
                                           : null,
                                     ),
                                   ),
@@ -339,16 +397,27 @@ class _PokemonDetailPageState extends State<PokemonDetailPage> {
                                       fit: BoxFit.scaleDown,
                                       child: Row(
                                         mainAxisSize: MainAxisSize.min,
-                                        children: pokemonDetails!.types.map((type) {
+                                        children: pokemonDetails!.types.map((
+                                          type,
+                                        ) {
                                           final iconPath = typeIcons[type];
                                           return Padding(
-                                            padding: const EdgeInsets.symmetric(horizontal: 12.0),
+                                            padding: const EdgeInsets.symmetric(
+                                              horizontal: 12.0,
+                                            ),
                                             child: Column(
                                               children: [
                                                 if (iconPath != null)
-                                                  Image.asset(iconPath, height: 48, width: 48)
+                                                  Image.asset(
+                                                    iconPath,
+                                                    height: 48,
+                                                    width: 48,
+                                                  )
                                                 else
-                                                  const SizedBox(height: 48, width: 48),
+                                                  const SizedBox(
+                                                    height: 48,
+                                                    width: 48,
+                                                  ),
                                                 const SizedBox(height: 6),
                                                 Text(
                                                   type,
@@ -375,7 +444,9 @@ class _PokemonDetailPageState extends State<PokemonDetailPage> {
                                       activeColor: const Color(0xFFFFD54F),
                                       isActive: isShiny,
                                       onTap: hasShinySprite
-                                          ? () => setState(() => isShiny = !isShiny)
+                                          ? () => setState(
+                                              () => isShiny = !isShiny,
+                                            )
                                           : null,
                                     ),
                                   ),
@@ -386,16 +457,21 @@ class _PokemonDetailPageState extends State<PokemonDetailPage> {
                               // =========================================================================
                               // CARROUSEL DES FORMES COSMETIQUES
                               // =========================================================================
-                              if (pokemonDetails!.cosmeticSprite.length > 1) ...[
+                              if (pokemonDetails!.cosmeticSprite.length >
+                                  1) ...[
                                 _FormCarousel(
-                                  cards: pokemonDetails!.cosmeticSprite.map((cosmetic) {
+                                  cards: pokemonDetails!.cosmeticSprite.map((
+                                    cosmetic,
+                                  ) {
                                     return _FormCard(
                                       label: cosmetic.name,
                                       imageUrl:
                                           'https://img.pokemondb.net/sprites/home/normal/${cosmetic.name}.png',
                                       fallbackImageUrl:
                                           'https://img.pokemondb.net/sprites/black-white/normal/${cosmetic.name}.png',
-                                      isSelected: displayedCosmeticName == cosmetic.name,
+                                      isSelected:
+                                          displayedCosmeticName ==
+                                          cosmetic.name,
                                       onTap: () => setState(() {
                                         displayedCosmeticName = cosmetic.name;
                                         selectedGameKey = null;
@@ -409,7 +485,8 @@ class _PokemonDetailPageState extends State<PokemonDetailPage> {
                               // =========================================================================
                               // PILULES DES TRANSFORMATIONS
                               // =========================================================================
-                              if (pokemonForms != null && pokemonForms!.isNotEmpty) ...[
+                              if (pokemonForms != null &&
+                                  pokemonForms!.isNotEmpty) ...[
                                 _FormCarousel(
                                   cards: pokemonForms!.map((forme) {
                                     return _FormCard(
@@ -429,7 +506,8 @@ class _PokemonDetailPageState extends State<PokemonDetailPage> {
                               // =========================================================================
                               // BOUTONS MEGA / GIGAMAX
                               // =========================================================================
-                              if (megaForms.isNotEmpty || gmaxForms.isNotEmpty) ...[
+                              if (megaForms.isNotEmpty ||
+                                  gmaxForms.isNotEmpty) ...[
                                 Wrap(
                                   spacing: 24.0,
                                   runSpacing: 16.0,
@@ -447,7 +525,8 @@ class _PokemonDetailPageState extends State<PokemonDetailPage> {
                                       ),
                                     for (final gmax in gmaxForms)
                                       _TransformationButton(
-                                        iconPath: transformationIcons['Gigamax']!,
+                                        iconPath:
+                                            transformationIcons['Gigamax']!,
                                         badge: gmaxForms.length > 1
                                             ? transformationSuffix(gmax)
                                             : null,
@@ -467,27 +546,46 @@ class _PokemonDetailPageState extends State<PokemonDetailPage> {
                       // =========================================================================
                       // BARRE D'ONGLETS
                       // =========================================================================
-                      SliverPersistentHeader(
-                        pinned: true,
-                        delegate: _SliverAppBarDelegate(
-                          TabBar(
-                            indicatorColor: Colors.white,
-                            indicatorWeight: 3,
-                            labelColor: Colors.white,
-                            unselectedLabelColor: Colors.white70,
-                            labelStyle: TextStyle(
-                              fontWeight: FontWeight.bold,
-                              shadows: _textShadows,
+                      // Sans cet absorbeur, le corps du NestedScrollView est
+                      // posé par-dessus l'en-tête épinglé et intercepte ses
+                      // clics : la barre d'onglets devient inerte.
+                      SliverOverlapAbsorber(
+                        handle: NestedScrollView.sliverOverlapAbsorberHandleFor(
+                          context,
+                        ),
+                        sliver: SliverPersistentHeader(
+                          pinned: true,
+                          delegate: _SliverAppBarDelegate(
+                            TabBar(
+                              indicatorColor: Colors.white,
+                              indicatorWeight: 3,
+                              labelColor: Colors.white,
+                              unselectedLabelColor: Colors.white70,
+                              labelStyle: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                shadows: _textShadows,
+                              ),
+                              unselectedLabelStyle: TextStyle(
+                                fontWeight: FontWeight.normal,
+                                shadows: _textShadows,
+                              ),
+                              tabs: [
+                                Tab(
+                                  text: AppLocalizations.of(context)!
+                                      .tabSprites,
+                                ),
+                                Tab(
+                                  text: AppLocalizations.of(context)!.tabInfo,
+                                ),
+                                Tab(
+                                  text: AppLocalizations.of(context)!.tabBattle,
+                                ),
+                                Tab(
+                                  text: AppLocalizations.of(context)!
+                                      .tabEvolutions,
+                                ),
+                              ],
                             ),
-                            unselectedLabelStyle: TextStyle(
-                              fontWeight: FontWeight.normal,
-                              shadows: _textShadows,
-                            ),
-                            tabs: const [
-                              Tab(text: 'SPRITES'),
-                              Tab(text: 'INFOS'),
-                              Tab(text: 'COMBAT'),
-                            ],
                           ),
                         ),
                       ),
@@ -509,20 +607,28 @@ class _PokemonDetailPageState extends State<PokemonDetailPage> {
                         selectedGameKey: selectedGameKey,
                         onSelect: (gameKey) => setState(() {
                           // Un second appui revient au rendu par défaut.
-                          selectedGameKey = selectedGameKey == gameKey ? null : gameKey;
+                          selectedGameKey = selectedGameKey == gameKey
+                              ? null
+                              : gameKey;
                           displayedCosmeticName = null;
                         }),
                       ),
-                      Center(
-                        child: Text(
-                          'Infos (Poids/Taille à déplacer ici)',
-                          style: TextStyle(color: Colors.white, shadows: _textShadows),
-                        ),
-                      ),
-                      Center(
-                        child: Text(
-                          'Stats de combat',
-                          style: TextStyle(color: Colors.white, shadows: _textShadows),
+                      InfoTab(details: pokemonDetails!, species: species),
+                      BattleTab(details: pokemonDetails!),
+                      EvolutionTab(
+                        chain: evolutionChain,
+                        currentSpeciesId: widget.pokemonId,
+                        // On empile une nouvelle fiche plutôt que de recharger
+                        // celle-ci : le retour arrière ramène au Pokémon d'où
+                        // l'on vient, ce qui est le comportement attendu.
+                        onSelect: (speciesId, apiName) => Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => PokemonDetailPage(
+                              pokemonName: apiName,
+                              pokemonId: speciesId,
+                            ),
+                          ),
                         ),
                       ),
                     ],
@@ -584,7 +690,10 @@ class _SpritesTab extends StatelessWidget {
               for (final gameSprites in generation.games)
                 _GameSpriteTile(
                   label: context.label(gameSprites.game.label),
-                  imageUrl: gameSprites.sprites.variant(shiny: isShiny, female: isFemale)!,
+                  imageUrl: gameSprites.sprites.variant(
+                    shiny: isShiny,
+                    female: isFemale,
+                  )!,
                   isSelected: selectedGameKey == gameSprites.game.spriteKey,
                   onTap: () => onSelect(gameSprites.game.spriteKey),
                 ),
@@ -621,7 +730,9 @@ class _GameSpriteTile extends StatelessWidget {
           color: Colors.black.withValues(alpha: isSelected ? 0.4 : 0.2),
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
-            color: isSelected ? Colors.white : Colors.white.withValues(alpha: 0.15),
+            color: isSelected
+                ? Colors.white
+                : Colors.white.withValues(alpha: 0.15),
             width: isSelected ? 2.0 : 1.0,
           ),
         ),
@@ -635,8 +746,10 @@ class _GameSpriteTile extends StatelessWidget {
                 imageUrl,
                 fit: BoxFit.contain,
                 filterQuality: FilterQuality.none,
-                errorBuilder: (context, error, stackTrace) =>
-                    const Icon(Icons.image_not_supported, color: Colors.white54),
+                errorBuilder: (context, error, stackTrace) => const Icon(
+                  Icons.image_not_supported,
+                  color: Colors.white54,
+                ),
               ),
             ),
             const SizedBox(height: 6),
@@ -805,7 +918,9 @@ class _FormCard extends StatelessWidget {
           color: Colors.black.withValues(alpha: 0.2),
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
-            color: isSelected ? Colors.white : Colors.white.withValues(alpha: 0.1),
+            color: isSelected
+                ? Colors.white
+                : Colors.white.withValues(alpha: 0.1),
             width: isSelected ? 2.0 : 1.0,
           ),
         ),
@@ -822,15 +937,21 @@ class _FormCard extends StatelessWidget {
                     return Image.network(
                       fallbackImageUrl,
                       fit: BoxFit.contain,
-                      errorBuilder: (context, error, stackTrace) =>
-                          const Icon(Icons.image_not_supported, color: Colors.white54),
+                      errorBuilder: (context, error, stackTrace) => const Icon(
+                        Icons.image_not_supported,
+                        color: Colors.white54,
+                      ),
                     );
                   },
                 ),
               ),
             ),
             Padding(
-              padding: const EdgeInsets.only(bottom: 8.0, left: 4.0, right: 4.0),
+              padding: const EdgeInsets.only(
+                bottom: 8.0,
+                left: 4.0,
+                right: 4.0,
+              ),
               child: Text(
                 label.toUpperCase(),
                 maxLines: 1,
@@ -938,7 +1059,9 @@ class _TransformationButtonState extends State<_TransformationButton>
                         : null,
                     border: widget.isSelected
                         ? null
-                        : Border.all(color: Colors.white.withValues(alpha: 0.3)),
+                        : Border.all(
+                            color: Colors.white.withValues(alpha: 0.3),
+                          ),
                     boxShadow: widget.isSelected
                         ? [
                             for (var i = 0; i < colors.length; i++)
@@ -947,8 +1070,14 @@ class _TransformationButtonState extends State<_TransformationButton>
                                 blurRadius: 10,
                                 spreadRadius: 1,
                                 offset: Offset(
-                                  math.cos(turn + i * 2 * math.pi / colors.length) * 3,
-                                  math.sin(turn + i * 2 * math.pi / colors.length) * 3,
+                                  math.cos(
+                                        turn + i * 2 * math.pi / colors.length,
+                                      ) *
+                                      3,
+                                  math.sin(
+                                        turn + i * 2 * math.pi / colors.length,
+                                      ) *
+                                      3,
                                 ),
                               ),
                           ]
@@ -971,7 +1100,9 @@ class _TransformationButtonState extends State<_TransformationButton>
                   color: const Color(0xFF1E1E1E),
                   shape: BoxShape.circle,
                   border: Border.all(
-                    color: widget.isSelected ? Colors.white : Colors.white.withValues(alpha: 0.5),
+                    color: widget.isSelected
+                        ? Colors.white
+                        : Colors.white.withValues(alpha: 0.5),
                     width: 1.5,
                   ),
                 ),
@@ -1003,9 +1134,15 @@ class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
   double get maxExtent => _tabBar.preferredSize.height;
 
   @override
-  Widget build(BuildContext context, double shrinkOffset, bool overlapsContent) {
+  Widget build(
+    BuildContext context,
+    double shrinkOffset,
+    bool overlapsContent,
+  ) {
     return Container(
-      color: overlapsContent ? Colors.black.withValues(alpha: 0.4) : Colors.transparent,
+      color: overlapsContent
+          ? Colors.black.withValues(alpha: 0.4)
+          : Colors.transparent,
       child: _tabBar,
     );
   }

@@ -3,7 +3,7 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 
 import 'l10n/app_localizations.dart';
 import 'screens/home_page.dart';
-import 'services/species_names.dart';
+import 'services/api_names.dart';
 import 'settings/app_settings.dart';
 import 'theme/app_theme.dart';
 
@@ -11,7 +11,7 @@ Future<void> main() async {
   // Les réglages et les noms d'espèces sont lus avant le premier rendu : les
   // grilles affichent des noms traduits dès la première image, sans clignoter.
   WidgetsFlutterBinding.ensureInitialized();
-  await SpeciesNames.load();
+  await ApiNames.load();
   final settings = await AppSettings.load();
 
   runApp(PokedexApp(settings: settings));

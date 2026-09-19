@@ -2,7 +2,7 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:pokedex/l10n/localized_label.dart';
 import 'package:pokedex/models/game.dart';
-import 'package:pokedex/services/species_names.dart';
+import 'package:pokedex/services/api_names.dart';
 
 void main() {
   group('LocalizedLabel', () {
@@ -49,16 +49,16 @@ void main() {
     });
   });
 
-  group('SpeciesNames.prettify', () {
+  group('ApiNames.prettify', () {
     test("Doit mettre en forme un identifiant d'API", () {
-      expect(SpeciesNames.prettify('mr-mime'), 'Mr Mime');
-      expect(SpeciesNames.prettify('raichu-alola'), 'Raichu Alola');
-      expect(SpeciesNames.prettify('pikachu'), 'Pikachu');
+      expect(ApiNames.prettify('mr-mime'), 'Mr Mime');
+      expect(ApiNames.prettify('raichu-alola'), 'Raichu Alola');
+      expect(ApiNames.prettify('pikachu'), 'Pikachu');
     });
 
     test('Doit encaisser les tirets superflus', () {
-      expect(SpeciesNames.prettify('ho--oh'), 'Ho Oh');
-      expect(SpeciesNames.prettify(''), '');
+      expect(ApiNames.prettify('ho--oh'), 'Ho Oh');
+      expect(ApiNames.prettify(''), '');
     });
   });
 }
