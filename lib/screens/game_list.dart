@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../l10n/localized_label.dart';
+
 import '../models/game.dart';
 import '../utils/assets_helper.dart';
 import 'game_pokedex_page.dart';
@@ -12,11 +14,16 @@ class GameList extends StatelessWidget {
   const GameList({super.key});
 
   /// Le libellé de la génération du jeu, lu dans le référentiel des sprites.
-  static String _generationLabel(GameDex game) {
+  static LocalizedLabel? _generationLabel(GameDex game) {
     for (final generation in pokemonGenerations) {
       if (generation.key == game.generationKey) return generation.label;
     }
-    return '';
+    return null;
+  }
+
+  static String _generationName(BuildContext context, GameDex game) {
+    final label = _generationLabel(game);
+    return label == null ? '' : context.label(label);
   }
 
   @override
@@ -75,7 +82,7 @@ class GameList extends StatelessWidget {
                       // (Switch) : on les contient plutôt que de les rogner.
                       errorBuilder: (context, error, stackTrace) => Center(
                         child: Text(
-                          game.label.toUpperCase(),
+                          context.label(game.label).toUpperCase(),
                           textAlign: TextAlign.center,
                           style: const TextStyle(
                             fontWeight: FontWeight.w900,
@@ -105,7 +112,7 @@ class GameList extends StatelessWidget {
                         SizedBox(
                           height: 26,
                           child: Text(
-                            game.label.toUpperCase(),
+                            context.label(game.label).toUpperCase(),
                             maxLines: 2,
                             overflow: TextOverflow.ellipsis,
                             style: const TextStyle(
@@ -119,7 +126,7 @@ class GameList extends StatelessWidget {
                         ),
                         const Spacer(),
                         Text(
-                          _generationLabel(game),
+                          _generationName(context, game),
                           style: TextStyle(
                             fontSize: 9,
                             height: 1.2,

@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 
+import '../l10n/app_localizations.dart';
 import 'game_list.dart';
 import 'region_list.dart';
+import 'settings_page.dart';
 
 /// L'accueil : les deux façons d'entrer dans le Pokédex.
 ///
@@ -13,34 +15,40 @@ class HomePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+
     return DefaultTabController(
       length: 2,
       child: Scaffold(
-        backgroundColor: const Color(0xFF121212),
         appBar: AppBar(
-          title: const Text(
-            'POKÉDEX',
-            style: TextStyle(fontWeight: FontWeight.w800, letterSpacing: 2.0),
-          ),
-          backgroundColor: Colors.transparent,
-          elevation: 0,
-          centerTitle: true,
-          bottom: const TabBar(
-            indicatorColor: Colors.redAccent,
-            indicatorWeight: 3,
-            labelColor: Colors.white,
-            unselectedLabelColor: Colors.white70,
-            labelStyle: TextStyle(
-              fontWeight: FontWeight.bold,
-              letterSpacing: 1.5,
+          title: Text(l10n.appTitle.toUpperCase()),
+          actions: [
+            IconButton(
+              icon: const Icon(Icons.settings_outlined),
+              tooltip: l10n.settingsTitle,
+              onPressed: () => Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const SettingsPage()),
+              ),
             ),
+          ],
+          bottom: TabBar(
             tabs: [
-              Tab(text: 'RÉGIONS'),
-              Tab(text: 'JEUX'),
+              Tab(text: l10n.tabRegions),
+              Tab(text: l10n.tabGames),
             ],
           ),
         ),
-        body: const TabBarView(children: [RegionList(), GameList()]),
+        // Les pages d'un TabBarView sont conservées d'une reconstruction à
+        // l'autre : un changement de thème atteint la barre de navigation, qui
+        // lit le thème elle-même, mais pas les listes, qui restent peintes dans
+        // l'ancien. La clé force leur reconstruction quand un réglage
+        // d'affichage change — au prix de la position de défilement, ce qui est
+        // sans conséquence pour une action aussi rare.
+        body: KeyedSubtree(
+          key: ValueKey('${Theme.of(context).brightness}-${Localizations.localeOf(context)}'),
+          child: const TabBarView(children: [RegionList(), GameList()]),
+        ),
       ),
     );
   }

@@ -1,3 +1,5 @@
+import '../l10n/localized_label.dart';
+
 /// Référentiel des jeux de la licence principale.
 ///
 /// Sert à deux choses : ordonner les sprites par jeu dans la page de détail, et
@@ -11,7 +13,7 @@ class Game {
   /// version-groups ne connaît que `gold-silver`.
   final String versionGroup;
 
-  final String label;
+  final LocalizedLabel label;
 
   /// Extension réelle des fichiers dans la banque de sprites. L'API annonce
   /// systématiquement des URL en `.png`, mais quelques jeux sont stockés en
@@ -28,7 +30,7 @@ class Game {
 
 class Generation {
   final String key;
-  final String label;
+  final LocalizedLabel label;
   final List<Game> games;
 
   const Generation({
@@ -87,113 +89,113 @@ int generationRank(String generationKey) => pokemonGenerations.indexWhere(
 const List<Generation> pokemonGenerations = [
   Generation(
     key: 'generation-i',
-    label: 'Génération I',
+    label: LocalizedLabel('Generation I', 'Génération I'),
     games: [
       Game(
         spriteKey: 'red-blue',
         versionGroup: 'red-blue',
-        label: 'Rouge · Bleu',
+        label: LocalizedLabel('Red · Blue', 'Rouge · Bleu'),
       ),
-      Game(spriteKey: 'yellow', versionGroup: 'yellow', label: 'Jaune'),
+      Game(spriteKey: 'yellow', versionGroup: 'yellow', label: LocalizedLabel('Yellow', 'Jaune')),
     ],
   ),
   Generation(
     key: 'generation-ii',
-    label: 'Génération II',
+    label: LocalizedLabel('Generation II', 'Génération II'),
     games: [
-      Game(spriteKey: 'gold', versionGroup: 'gold-silver', label: 'Or'),
-      Game(spriteKey: 'silver', versionGroup: 'gold-silver', label: 'Argent'),
-      Game(spriteKey: 'crystal', versionGroup: 'crystal', label: 'Cristal'),
+      Game(spriteKey: 'gold', versionGroup: 'gold-silver', label: LocalizedLabel('Gold', 'Or')),
+      Game(spriteKey: 'silver', versionGroup: 'gold-silver', label: LocalizedLabel('Silver', 'Argent')),
+      Game(spriteKey: 'crystal', versionGroup: 'crystal', label: LocalizedLabel('Crystal', 'Cristal')),
     ],
   ),
   Generation(
     key: 'generation-iii',
-    label: 'Génération III',
+    label: LocalizedLabel('Generation III', 'Génération III'),
     games: [
       Game(
         spriteKey: 'ruby-sapphire',
         versionGroup: 'ruby-sapphire',
-        label: 'Rubis · Saphir',
+        label: LocalizedLabel('Ruby · Sapphire', 'Rubis · Saphir'),
       ),
-      Game(spriteKey: 'emerald', versionGroup: 'emerald', label: 'Émeraude'),
+      Game(spriteKey: 'emerald', versionGroup: 'emerald', label: LocalizedLabel('Emerald', 'Émeraude')),
       Game(
         spriteKey: 'firered-leafgreen',
         versionGroup: 'firered-leafgreen',
-        label: 'Rouge Feu · Vert Feuille',
+        label: LocalizedLabel('FireRed · LeafGreen', 'Rouge Feu · Vert Feuille'),
       ),
     ],
   ),
   Generation(
     key: 'generation-iv',
-    label: 'Génération IV',
+    label: LocalizedLabel('Generation IV', 'Génération IV'),
     games: [
       Game(
         spriteKey: 'diamond-pearl',
         versionGroup: 'diamond-pearl',
-        label: 'Diamant · Perle',
+        label: LocalizedLabel('Diamond · Pearl', 'Diamant · Perle'),
       ),
-      Game(spriteKey: 'platinum', versionGroup: 'platinum', label: 'Platine'),
+      Game(spriteKey: 'platinum', versionGroup: 'platinum', label: LocalizedLabel('Platinum', 'Platine')),
       Game(
         spriteKey: 'heartgold-soulsilver',
         versionGroup: 'heartgold-soulsilver',
-        label: 'Or HeartGold · Argent SoulSilver',
+        label: LocalizedLabel('HeartGold · SoulSilver', 'Or HeartGold · Argent SoulSilver'),
       ),
     ],
   ),
   Generation(
     key: 'generation-v',
-    label: 'Génération V',
+    label: LocalizedLabel('Generation V', 'Génération V'),
     games: [
       Game(
         spriteKey: 'black-white',
         versionGroup: 'black-white',
-        label: 'Noir · Blanc',
+        label: LocalizedLabel('Black · White', 'Noir · Blanc'),
       ),
     ],
   ),
   Generation(
     key: 'generation-vi',
-    label: 'Génération VI',
+    label: LocalizedLabel('Generation VI', 'Génération VI'),
     games: [
-      Game(spriteKey: 'x-y', versionGroup: 'x-y', label: 'X · Y'),
+      Game(spriteKey: 'x-y', versionGroup: 'x-y', label: LocalizedLabel('X · Y', 'X · Y')),
       Game(
         spriteKey: 'omegaruby-alphasapphire',
         versionGroup: 'omega-ruby-alpha-sapphire',
-        label: 'Rubis Oméga · Saphir Alpha',
+        label: LocalizedLabel('Omega Ruby · Alpha Sapphire', 'Rubis Oméga · Saphir Alpha'),
       ),
     ],
   ),
   Generation(
     key: 'generation-vii',
-    label: 'Génération VII',
+    label: LocalizedLabel('Generation VII', 'Génération VII'),
     games: [
       Game(
         spriteKey: 'ultra-sun-ultra-moon',
         versionGroup: 'ultra-sun-ultra-moon',
-        label: 'Ultra-Soleil · Ultra-Lune',
+        label: LocalizedLabel('Ultra Sun · Ultra Moon', 'Ultra-Soleil · Ultra-Lune'),
         spriteExtension: 'gif',
       ),
     ],
   ),
   Generation(
     key: 'generation-viii',
-    label: 'Génération VIII',
+    label: LocalizedLabel('Generation VIII', 'Génération VIII'),
     games: [
       Game(
         spriteKey: 'brilliant-diamond-shining-pearl',
         versionGroup: 'brilliant-diamond-shining-pearl',
-        label: 'Diamant Étincelant · Perle Scintillante',
+        label: LocalizedLabel('Brilliant Diamond · Shining Pearl', 'Diamant Étincelant · Perle Scintillante'),
       ),
     ],
   ),
   Generation(
     key: 'generation-ix',
-    label: 'Génération IX',
+    label: LocalizedLabel('Generation IX', 'Génération IX'),
     games: [
       Game(
         spriteKey: 'scarlet-violet',
         versionGroup: 'scarlet-violet',
-        label: 'Écarlate · Violet',
+        label: LocalizedLabel('Scarlet · Violet', 'Écarlate · Violet'),
       ),
     ],
   ),
@@ -204,8 +206,8 @@ class PokedexRef {
   /// Clé de l'endpoint `/pokedex`.
   final String apiName;
 
-  /// Libellé français, repris de `/pokedex/<apiName>.names`.
-  final String label;
+  /// Libellés repris de `/pokedex/<apiName>.names`, qui les sert traduits.
+  final LocalizedLabel label;
 
   const PokedexRef(this.apiName, this.label);
 }
@@ -220,7 +222,7 @@ class GameDex {
   /// Clé de l'endpoint `/version-group`, et clé de [versionGroupGenerations].
   final String versionGroup;
 
-  final String label;
+  final LocalizedLabel label;
 
   /// Dans l'ordre des onglets, jamais vide : les jeux sans Pokédex (Colosseum,
   /// XD) sont simplement absents de [gamePokedexes].
@@ -264,145 +266,148 @@ class GameDex {
 const List<GameDex> gamePokedexes = [
   GameDex(
     versionGroup: 'red-blue',
-    label: 'Rouge · Bleu',
-    pokedexes: [PokedexRef('kanto', 'Kanto')],
+    label: LocalizedLabel('Red · Blue', 'Rouge · Bleu'),
+    pokedexes: [PokedexRef('kanto', LocalizedLabel('Kanto', 'Kanto'))],
   ),
   GameDex(
     versionGroup: 'yellow',
-    label: 'Jaune',
-    pokedexes: [PokedexRef('kanto', 'Kanto')],
+    label: LocalizedLabel('Yellow', 'Jaune'),
+    pokedexes: [PokedexRef('kanto', LocalizedLabel('Kanto', 'Kanto'))],
   ),
   GameDex(
     versionGroup: 'gold-silver',
-    label: 'Or · Argent',
+    label: LocalizedLabel('Gold · Silver', 'Or · Argent'),
     nationalDexMax: 251,
-    pokedexes: [PokedexRef('original-johto', 'Johto')],
+    pokedexes: [PokedexRef('original-johto', LocalizedLabel('Johto', 'Johto'))],
   ),
   GameDex(
     versionGroup: 'crystal',
-    label: 'Cristal',
+    label: LocalizedLabel('Crystal', 'Cristal'),
     nationalDexMax: 251,
-    pokedexes: [PokedexRef('original-johto', 'Johto')],
+    pokedexes: [PokedexRef('original-johto', LocalizedLabel('Johto', 'Johto'))],
   ),
   GameDex(
     versionGroup: 'ruby-sapphire',
-    label: 'Rubis · Saphir',
+    label: LocalizedLabel('Ruby · Sapphire', 'Rubis · Saphir'),
     nationalDexMax: 386,
-    pokedexes: [PokedexRef('hoenn', 'Hoenn')],
+    pokedexes: [PokedexRef('hoenn', LocalizedLabel('Hoenn', 'Hoenn'))],
   ),
   GameDex(
     versionGroup: 'emerald',
-    label: 'Émeraude',
+    label: LocalizedLabel('Emerald', 'Émeraude'),
     nationalDexMax: 386,
-    pokedexes: [PokedexRef('hoenn', 'Hoenn')],
+    pokedexes: [PokedexRef('hoenn', LocalizedLabel('Hoenn', 'Hoenn'))],
   ),
   GameDex(
     versionGroup: 'firered-leafgreen',
-    label: 'Rouge Feu · Vert Feuille',
+    label: LocalizedLabel('FireRed · LeafGreen', 'Rouge Feu · Vert Feuille'),
     nationalDexMax: 386,
-    pokedexes: [PokedexRef('kanto', 'Kanto')],
+    pokedexes: [PokedexRef('kanto', LocalizedLabel('Kanto', 'Kanto'))],
   ),
   GameDex(
     versionGroup: 'diamond-pearl',
-    label: 'Diamant · Perle',
+    label: LocalizedLabel('Diamond · Pearl', 'Diamant · Perle'),
     nationalDexMax: 493,
-    pokedexes: [PokedexRef('original-sinnoh', 'Sinnoh')],
+    pokedexes: [PokedexRef('original-sinnoh', LocalizedLabel('Sinnoh', 'Sinnoh'))],
   ),
   GameDex(
     versionGroup: 'platinum',
-    label: 'Platine',
+    label: LocalizedLabel('Platinum', 'Platine'),
     nationalDexMax: 493,
-    pokedexes: [PokedexRef('extended-sinnoh', 'Sinnoh étendu')],
+    pokedexes: [PokedexRef('extended-sinnoh', LocalizedLabel('Extended Sinnoh', 'Sinnoh étendu'))],
   ),
   GameDex(
     versionGroup: 'heartgold-soulsilver',
-    label: 'Or HeartGold · Argent SoulSilver',
+    label: LocalizedLabel('HeartGold · SoulSilver', 'Or HeartGold · Argent SoulSilver'),
     nationalDexMax: 493,
-    pokedexes: [PokedexRef('updated-johto', 'Johto')],
+    pokedexes: [PokedexRef('updated-johto', LocalizedLabel('Johto', 'Johto'))],
   ),
   GameDex(
     versionGroup: 'black-white',
-    label: 'Noir · Blanc',
+    label: LocalizedLabel('Black · White', 'Noir · Blanc'),
     nationalDexMax: 649,
-    pokedexes: [PokedexRef('original-unova', 'Unys')],
+    pokedexes: [PokedexRef('original-unova', LocalizedLabel('Unova', 'Unys'))],
   ),
   GameDex(
     versionGroup: 'black-2-white-2',
-    label: 'Noir 2 · Blanc 2',
+    label: LocalizedLabel('Black 2 · White 2', 'Noir 2 · Blanc 2'),
     nationalDexMax: 649,
-    pokedexes: [PokedexRef('updated-unova', 'Unys')],
+    pokedexes: [PokedexRef('updated-unova', LocalizedLabel('Unova', 'Unys'))],
   ),
   GameDex(
     versionGroup: 'x-y',
-    label: 'X · Y',
+    label: LocalizedLabel('X · Y', 'X · Y'),
     nationalDexMax: 721,
     pokedexes: [
-      PokedexRef('kalos-central', 'Centre'),
-      PokedexRef('kalos-coastal', 'Côte'),
-      PokedexRef('kalos-mountain', 'Montagne'),
+      PokedexRef('kalos-central', LocalizedLabel('Central', 'Centre')),
+      PokedexRef('kalos-coastal', LocalizedLabel('Coastal', 'Côte')),
+      PokedexRef('kalos-mountain', LocalizedLabel('Mountain', 'Montagne')),
     ],
   ),
   GameDex(
     versionGroup: 'omega-ruby-alpha-sapphire',
-    label: 'Rubis Oméga · Saphir Alpha',
+    label: LocalizedLabel('Omega Ruby · Alpha Sapphire', 'Rubis Oméga · Saphir Alpha'),
     nationalDexMax: 721,
-    pokedexes: [PokedexRef('updated-hoenn', 'Hoenn')],
+    pokedexes: [PokedexRef('updated-hoenn', LocalizedLabel('Hoenn', 'Hoenn'))],
   ),
   GameDex(
     versionGroup: 'sun-moon',
-    label: 'Soleil · Lune',
-    pokedexes: [PokedexRef('original-alola', 'Alola')],
+    label: LocalizedLabel('Sun · Moon', 'Soleil · Lune'),
+    pokedexes: [PokedexRef('original-alola', LocalizedLabel('Alola', 'Alola'))],
   ),
   GameDex(
     versionGroup: 'ultra-sun-ultra-moon',
-    label: 'Ultra-Soleil · Ultra-Lune',
-    pokedexes: [PokedexRef('updated-alola', 'Alola')],
+    label: LocalizedLabel('Ultra Sun · Ultra Moon', 'Ultra-Soleil · Ultra-Lune'),
+    pokedexes: [PokedexRef('updated-alola', LocalizedLabel('Alola', 'Alola'))],
   ),
   GameDex(
     versionGroup: 'lets-go-pikachu-lets-go-eevee',
-    label: "Let's Go Pikachu · Let's Go Évoli",
-    pokedexes: [PokedexRef('letsgo-kanto', 'Kanto')],
+    label: LocalizedLabel(
+      "Let's Go Pikachu · Let's Go Eevee",
+      "Let's Go Pikachu · Let's Go Évoli",
+    ),
+    pokedexes: [PokedexRef('letsgo-kanto', LocalizedLabel('Kanto', 'Kanto'))],
   ),
   GameDex(
     versionGroup: 'sword-shield',
-    label: 'Épée · Bouclier',
+    label: LocalizedLabel('Sword · Shield', 'Épée · Bouclier'),
     pokedexes: [
-      PokedexRef('galar', 'Galar'),
-      PokedexRef('isle-of-armor', 'Isolarmure'),
-      PokedexRef('crown-tundra', 'Couronneige'),
+      PokedexRef('galar', LocalizedLabel('Galar', 'Galar')),
+      PokedexRef('isle-of-armor', LocalizedLabel('Isle of Armor', 'Isolarmure')),
+      PokedexRef('crown-tundra', LocalizedLabel('Crown Tundra', 'Couronneige')),
     ],
   ),
   GameDex(
     versionGroup: 'brilliant-diamond-shining-pearl',
-    label: 'Diamant Étincelant · Perle Scintillante',
+    label: LocalizedLabel('Brilliant Diamond · Shining Pearl', 'Diamant Étincelant · Perle Scintillante'),
     nationalDexMax: 493,
-    pokedexes: [PokedexRef('original-sinnoh', 'Sinnoh')],
+    pokedexes: [PokedexRef('original-sinnoh', LocalizedLabel('Sinnoh', 'Sinnoh'))],
   ),
   GameDex(
     versionGroup: 'legends-arceus',
-    label: 'Légendes Arceus',
-    pokedexes: [PokedexRef('hisui', 'Hisui')],
+    label: LocalizedLabel('Legends: Arceus', 'Légendes Arceus'),
+    pokedexes: [PokedexRef('hisui', LocalizedLabel('Hisui', 'Hisui'))],
   ),
   GameDex(
     versionGroup: 'scarlet-violet',
-    label: 'Écarlate · Violet',
+    label: LocalizedLabel('Scarlet · Violet', 'Écarlate · Violet'),
     pokedexes: [
-      PokedexRef('paldea', 'Paldea'),
-      PokedexRef('kitakami', 'Septentria'),
-      PokedexRef('blueberry', 'Myrtille'),
+      PokedexRef('paldea', LocalizedLabel('Paldea', 'Paldea')),
+      PokedexRef('kitakami', LocalizedLabel('Kitakami', 'Septentria')),
+      PokedexRef('blueberry', LocalizedLabel('Blueberry', 'Myrtille')),
     ],
   ),
   GameDex(
     versionGroup: 'legends-za',
-    label: 'Légendes Z-A',
+    label: LocalizedLabel('Legends: Z-A', 'Légendes Z-A'),
     pokedexes: [
-      PokedexRef('lumiose-city', 'Illumis'),
-      PokedexRef('hyperspace', 'Extra Illumis'),
+      PokedexRef('lumiose-city', LocalizedLabel('Lumiose City', 'Illumis')),
+      PokedexRef('hyperspace', LocalizedLabel('Hyperspace', 'Extra Illumis')),
     ],
   ),
   GameDex(
     versionGroup: 'champions',
-    label: 'Champions',
-    pokedexes: [PokedexRef('champions', 'Champions')],
+    label: LocalizedLabel('Champions', 'Champions'),
+    pokedexes: [PokedexRef('champions', LocalizedLabel('Champions', 'Champions'))],
   ),
 ];

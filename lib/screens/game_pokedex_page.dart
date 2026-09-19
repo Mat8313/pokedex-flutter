@@ -1,8 +1,12 @@
 import 'package:flutter/material.dart';
 
+import '../l10n/localized_label.dart';
+
+import '../l10n/app_localizations.dart';
 import '../models/game.dart';
 import '../models/pokedex_entry.dart';
 import '../services/poke_api_service.dart';
+import '../theme/app_theme.dart';
 import '../widgets/pokemon_grid.dart';
 
 /// Le Pokédex d'un jeu : un onglet par Pokédex régional, plus un onglet
@@ -64,18 +68,16 @@ class _GamePokedexPageState extends State<GamePokedexPage> {
         future: dexKey == _nationalKey ? _nationalDex() : _regionalDex(dexKey),
         builder: (context, snapshot) {
           if (snapshot.hasError) {
-            return const Center(
+            return Center(
               child: Text(
-                'Impossible de charger ce Pokédex',
-                style: TextStyle(color: Colors.white70),
+                AppLocalizations.of(context)!.errorPokedexLoad,
+                style: TextStyle(color: context.mutedColor),
               ),
             );
           }
 
           if (!snapshot.hasData) {
-            return const Center(
-              child: CircularProgressIndicator(color: Colors.redAccent),
-            );
+            return const Center(child: CircularProgressIndicator());
           }
 
           return PokemonGrid(entries: snapshot.data!);
@@ -94,34 +96,17 @@ class _GamePokedexPageState extends State<GamePokedexPage> {
     return DefaultTabController(
       length: pokedexes.length + (hasNationalDex ? 1 : 0),
       child: Scaffold(
-        backgroundColor: const Color(0xFF121212),
         appBar: AppBar(
-          title: Text(
-            widget.game.label.toUpperCase(),
-            style: const TextStyle(
-              fontWeight: FontWeight.w800,
-              letterSpacing: 1.5,
-            ),
-          ),
-          backgroundColor: Colors.transparent,
-          elevation: 0,
-          centerTitle: true,
+          title: Text(context.label(widget.game.label).toUpperCase()),
           bottom: TabBar(
             // Au-delà de deux onglets, les libellés ne tiennent plus sur la
             // largeur d'un téléphone.
             isScrollable: pokedexes.length > 1,
             tabAlignment: pokedexes.length > 1 ? TabAlignment.start : null,
-            indicatorColor: Colors.redAccent,
-            indicatorWeight: 3,
-            labelColor: Colors.white,
-            unselectedLabelColor: Colors.white70,
-            labelStyle: const TextStyle(
-              fontWeight: FontWeight.bold,
-              fontSize: 13,
-            ),
+            labelStyle: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
             tabs: [
-              for (final dex in pokedexes) Tab(text: dex.label.toUpperCase()),
-              if (hasNationalDex) const Tab(text: 'NATIONAL'),
+              for (final dex in pokedexes) Tab(text: context.label(dex.label).toUpperCase()),
+              if (hasNationalDex) Tab(text: AppLocalizations.of(context)!.tabNational),
             ],
           ),
         ),

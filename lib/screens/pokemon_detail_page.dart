@@ -3,6 +3,11 @@ import 'dart:ui';
 
 import 'package:flutter/material.dart';
 
+import '../services/species_names.dart';
+import '../settings/app_settings.dart';
+
+import '../l10n/localized_label.dart';
+
 import '../services/poke_api_service.dart';
 import '../models/pokemon_detail.dart';
 import '../models/pokemon_forms.dart';
@@ -49,7 +54,10 @@ class _PokemonDetailPageState extends State<PokemonDetailPage> {
   // toute seule quand les bascules shiny/sexe changent.
   String? selectedGameKey;
   String? formVersionGroup;
+  /// Initialisé dans [didChangeDependencies] depuis le réglage
+  /// « chromatique par défaut », que l'on ne peut pas lire dans [initState].
   bool isShiny = false;
+  bool _shinyInitialised = false;
   bool isFemale = false;
 
   final PokeApiService apiService = PokeApiService();
@@ -161,6 +169,17 @@ class _PokemonDetailPageState extends State<PokemonDetailPage> {
     fetchPokemonForm(widget.pokemonId);
     fetchPokemonTransformation(widget.pokemonId);
   }
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+
+    // Une seule fois : un changement de réglage en cours de route ne doit pas
+    // écraser la bascule faite à la main sur cette fiche.
+    if (_shinyInitialised) return;
+    _shinyInitialised = true;
+    isShiny = context.settings.shinyByDefault;
+  }
+
 
   @override
   Widget build(BuildContext context) {
@@ -173,7 +192,12 @@ class _PokemonDetailPageState extends State<PokemonDetailPage> {
         ? cosmeticUrlCandidates(displayedCosmeticName!)
         : spriteUrlCandidates(currentBaseId);
 
-    final displayName = displayedCosmeticName ?? pokemonDetails?.name ?? widget.pokemonName;
+    final rawName = displayedCosmeticName ?? pokemonDetails?.name ?? widget.pokemonName;
+    // Seule l'espèce de base a un nom traduit : une forme (`raichu-alola`)
+    // n'en a pas, on se rabat alors sur son identifiant mis en forme.
+    final displayName = rawName == widget.pokemonName
+        ? context.speciesName(widget.pokemonId, rawName)
+        : SpeciesNames.prettify(rawName);
 
     String bgPath = 'assets/background/Fond_Type_Normal_GO.png';
     if (pokemonDetails != null && pokemonDetails!.types.isNotEmpty) {
@@ -543,7 +567,7 @@ class _SpritesTab extends StatelessWidget {
           Padding(
             padding: const EdgeInsets.only(bottom: 12),
             child: Text(
-              generation.generation.label.toUpperCase(),
+              context.label(generation.generation.label).toUpperCase(),
               style: TextStyle(
                 color: Colors.white,
                 fontSize: 13,
@@ -559,7 +583,7 @@ class _SpritesTab extends StatelessWidget {
             children: [
               for (final gameSprites in generation.games)
                 _GameSpriteTile(
-                  label: gameSprites.game.label,
+                  label: context.label(gameSprites.game.label),
                   imageUrl: gameSprites.sprites.variant(shiny: isShiny, female: isFemale)!,
                   isSelected: selectedGameKey == gameSprites.game.spriteKey,
                   onTap: () => onSelect(gameSprites.game.spriteKey),

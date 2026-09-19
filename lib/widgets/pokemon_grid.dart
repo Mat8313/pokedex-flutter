@@ -2,6 +2,9 @@ import 'package:flutter/material.dart';
 
 import '../models/pokedex_entry.dart';
 import '../screens/pokemon_detail_page.dart';
+import '../services/species_names.dart';
+import '../settings/app_settings.dart';
+import '../theme/app_theme.dart';
 
 /// Grille de vignettes, partagée par le tri par région et le tri par jeu.
 ///
@@ -16,6 +19,13 @@ class PokemonGrid extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final double screenWidth = MediaQuery.of(context).size.width;
+    final missingDisplay = context.settings.missingSpecies;
+
+    // Masquer les absents fait sauter la numérotation, c'est le choix de
+    // l'utilisateur : le réglage le dit explicitement.
+    final visible = missingDisplay == MissingSpeciesDisplay.hidden
+        ? entries.where((entry) => entry.availableInGame).toList()
+        : entries;
 
     int dynamicCrossAxisCount = (screenWidth / 120).toInt();
 
@@ -32,14 +42,16 @@ class PokemonGrid extends StatelessWidget {
         mainAxisSpacing: 12,
         childAspectRatio: 0.75,
       ),
-      itemCount: entries.length,
+      itemCount: visible.length,
       itemBuilder: (context, index) {
-        final entry = entries[index];
+        final entry = visible[index];
+
         // Dans un Pokédex National, une espèce absente du jeu garde sa place
         // mais s'efface : c'est notre équivalent du ----- affiché par le jeu.
         // Elle reste consultable, l'application étant un ouvrage de référence
         // et non une sauvegarde.
-        final missing = !entry.availableInGame;
+        final missing =
+            !entry.availableInGame && missingDisplay == MissingSpeciesDisplay.greyed;
 
         Widget sprite = Image.network(entry.imageUrl, fit: BoxFit.contain);
         if (missing) {
@@ -67,11 +79,11 @@ class PokemonGrid extends StatelessWidget {
             opacity: missing ? 0.4 : 1,
             child: Container(
               decoration: BoxDecoration(
-                color: const Color(0xFF1E1E1E),
+                color: context.cardColor,
                 borderRadius: BorderRadius.circular(16),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.3),
+                    color: Colors.black.withValues(alpha: 0.2),
                     blurRadius: 8,
                     offset: const Offset(0, 4),
                   ),
@@ -87,11 +99,11 @@ class PokemonGrid extends StatelessWidget {
                     ),
                   ),
                   Text(
-                    entry.name.toUpperCase(),
-                    style: const TextStyle(
+                    context.speciesName(entry.speciesId, entry.name).toUpperCase(),
+                    style: TextStyle(
                       fontWeight: FontWeight.bold,
                       fontSize: 12,
-                      color: Colors.white,
+                      color: context.colors.onSurface,
                     ),
                     textAlign: TextAlign.center,
                     maxLines: 1,
@@ -102,7 +114,7 @@ class PokemonGrid extends StatelessWidget {
                     '#${entry.entryNumber.toString().padLeft(3, '0')}',
                     style: TextStyle(
                       fontSize: 11,
-                      color: Colors.grey[500],
+                      color: context.mutedColor,
                       fontWeight: FontWeight.w600,
                     ),
                   ),
@@ -115,7 +127,7 @@ class PokemonGrid extends StatelessWidget {
                             'N°${entry.speciesId.toString().padLeft(4, '0')}',
                             style: TextStyle(
                               fontSize: 10,
-                              color: Colors.grey[700],
+                              color: context.mutedColor.withValues(alpha: 0.7),
                             ),
                           )
                         : null,
@@ -134,24 +146,8 @@ class PokemonGrid extends StatelessWidget {
 /// Matrice de désaturation (luminance ITU-R BT.709), pour les espèces qu'un jeu
 /// ne contient pas.
 const List<double> _greyscale = <double>[
-  0.2126,
-  0.7152,
-  0.0722,
-  0,
-  0,
-  0.2126,
-  0.7152,
-  0.0722,
-  0,
-  0,
-  0.2126,
-  0.7152,
-  0.0722,
-  0,
-  0,
-  0,
-  0,
-  0,
-  1,
-  0,
+  0.2126, 0.7152, 0.0722, 0, 0,
+  0.2126, 0.7152, 0.0722, 0, 0,
+  0.2126, 0.7152, 0.0722, 0, 0,
+  0, 0, 0, 1, 0,
 ];

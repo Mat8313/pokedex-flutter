@@ -1,0 +1,100 @@
+{
+  "@@locale": "en",
+
+  "appTitle": "Pokédex",
+  "tabRegions": "REGIONS",
+  "tabGames": "GAMES",
+  "tabNational": "NATIONAL",
+
+  "tabSprites": "SPRITES",
+  "tabInfo": "INFO",
+  "tabBattle": "BATTLE",
+  "tabEvolutions": "EVOLUTIONS",
+
+  "errorPokedexLoad": "Could not load this Pokédex",
+  "errorNetwork": "Network error",
+  "retry": "Retry",
+
+  "searchHint": "Search a Pokémon",
+  "filterTypes": "Types",
+  "filterClear": "Clear",
+  "noResults": "Nothing matches this search",
+  "resultCount": "{count, plural, =0{No Pokémon} =1{1 Pokémon} other{{count} Pokémon}}",
+  "@resultCount": {
+    "placeholders": { "count": { "type": "int" } }
+  },
+
+  "infoCategory": "Category",
+  "infoHeight": "Height",
+  "infoWeight": "Weight",
+  "infoAbilities": "Abilities",
+  "infoHiddenAbility": "hidden",
+  "infoEggGroups": "Egg groups",
+  "infoCaptureRate": "Capture rate",
+  "infoGrowthRate": "Growth rate",
+  "infoGender": "Gender",
+  "infoGenderless": "Genderless",
+  "infoPokedexEntry": "Pokédex entry",
+  "infoUnknown": "Unknown",
+
+  "statHp": "HP",
+  "statAttack": "Attack",
+  "statDefense": "Defense",
+  "statSpecialAttack": "Sp. Atk",
+  "statSpecialDefense": "Sp. Def",
+  "statSpeed": "Speed",
+  "statTotal": "Total",
+  "battleBaseStats": "Base stats",
+  "battleTypeChart": "Type matchups",
+  "battleWeaknesses": "Weak to",
+  "battleResistances": "Resists",
+  "battleImmunities": "Immune to",
+  "battleNeutral": "This Pokémon has no particular weakness or resistance.",
+
+  "evolutionNone": "This Pokémon does not evolve.",
+  "evolutionAtLevel": "Level {level}",
+  "@evolutionAtLevel": {
+    "placeholders": { "level": { "type": "int" } }
+  },
+  "evolutionUseItem": "Use {item}",
+  "@evolutionUseItem": {
+    "placeholders": { "item": { "type": "String" } }
+  },
+  "evolutionHoldItem": "Holding {item}",
+  "@evolutionHoldItem": {
+    "placeholders": { "item": { "type": "String" } }
+  },
+  "evolutionTrade": "Trade",
+  "evolutionHighFriendship": "High friendship",
+  "evolutionKnowsMove": "Knows {move}",
+  "@evolutionKnowsMove": {
+    "placeholders": { "move": { "type": "String" } }
+  },
+  "evolutionDaytime": "Daytime",
+  "evolutionNighttime": "Night",
+  "evolutionLevelUp": "Level up",
+  "evolutionOther": "Special condition",
+
+  "settingsTitle": "Settings",
+  "settingsLanguage": "Language",
+  "settingsLanguageEnglish": "English",
+  "settingsLanguageFrench": "Français",
+  "settingsAppearance": "Appearance",
+  "settingsTheme": "Theme",
+  "settingsThemeDark": "Dark",
+  "settingsThemeLight": "Light",
+  "settingsThemeSystem": "System",
+  "settingsPokedexSection": "Pokédex",
+  "settingsShinyByDefault": "Shiny by default",
+  "settingsShinyByDefaultHint": "Open every Pokémon on its shiny sprite",
+  "settingsMissingSpecies": "Species absent from a game",
+  "settingsMissingSpeciesHint": "In a game's National Pokédex",
+  "settingsMissingGreyed": "Greyed out",
+  "settingsMissingHidden": "Hidden",
+  "settingsMissingShown": "Shown normally",
+  "settingsAbout": "About",
+  "settingsDataSource": "Data from PokéAPI",
+  "settingsSpritesSource": "Sprites and artwork from the PokeAPI/sprites bank",
+
+  "gameNoNationalDex": "This game has no National Pokédex."
+}

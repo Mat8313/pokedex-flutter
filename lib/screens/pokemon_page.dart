@@ -50,21 +50,10 @@ class _PokemonPageState extends State<PokemonPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF121212),
-      appBar: AppBar(
-        title: const Text(
-          'POKÉDEX',
-          style: TextStyle(fontWeight: FontWeight.w800, letterSpacing: 2.0),
-        ),
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        centerTitle: true,
-      ),
+      appBar: AppBar(title: Text(widget.regionName.toUpperCase())),
 
       body: isLoading
-          ? const Center(
-              child: CircularProgressIndicator(color: Colors.redAccent),
-            )
+          ? const Center(child: CircularProgressIndicator())
           // Le tri par région numérote au national : les deux numéros d'une
           // entrée sont donc les mêmes.
           : PokemonGrid(

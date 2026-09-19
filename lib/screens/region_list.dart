@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 
 import 'pokemon_page.dart';
 import '../models/region.dart';
+import '../l10n/localized_label.dart';
+import '../theme/app_theme.dart';
 
 /// La liste des régions, sans échafaudage : elle est montée comme onglet de
 /// [HomePage], à côté de la liste des jeux.
@@ -15,7 +17,7 @@ class RegionList extends StatefulWidget {
 class _RegionListState extends State<RegionList> {
   final List<Region> regions = [
     Region(
-      name: 'Kanto',
+      name: LocalizedLabel('Kanto', 'Kanto'),
       firstId: 1,
       lastId: 151,
       starters: [
@@ -25,7 +27,7 @@ class _RegionListState extends State<RegionList> {
       ],
     ),
     Region(
-      name: 'Johto',
+      name: LocalizedLabel('Johto', 'Johto'),
       firstId: 152,
       lastId: 251,
       starters: [
@@ -35,7 +37,7 @@ class _RegionListState extends State<RegionList> {
       ],
     ),
     Region(
-      name: 'Hoenn',
+      name: LocalizedLabel('Hoenn', 'Hoenn'),
       firstId: 252,
       lastId: 386,
       starters: [
@@ -45,7 +47,7 @@ class _RegionListState extends State<RegionList> {
       ],
     ),
     Region(
-      name: 'Sinnoh',
+      name: LocalizedLabel('Sinnoh', 'Sinnoh'),
       firstId: 387,
       lastId: 493,
       starters: [
@@ -55,7 +57,7 @@ class _RegionListState extends State<RegionList> {
       ],
     ),
     Region(
-      name: 'unys',
+      name: LocalizedLabel('Unova', 'Unys'),
       firstId: 494,
       lastId: 649,
       starters: [
@@ -65,7 +67,7 @@ class _RegionListState extends State<RegionList> {
       ],
     ),
     Region(
-      name: 'kalos',
+      name: LocalizedLabel('Kalos', 'Kalos'),
       firstId: 650,
       lastId: 721,
       starters: [
@@ -75,7 +77,7 @@ class _RegionListState extends State<RegionList> {
       ],
     ),
     Region(
-      name: 'alola',
+      name: LocalizedLabel('Alola', 'Alola'),
       firstId: 722,
       lastId: 809,
       starters: [
@@ -85,7 +87,7 @@ class _RegionListState extends State<RegionList> {
       ],
     ),
     Region(
-      name: 'galar',
+      name: LocalizedLabel('Galar', 'Galar'),
       firstId: 810,
       lastId: 898,
       starters: [
@@ -95,7 +97,7 @@ class _RegionListState extends State<RegionList> {
       ],
     ),
     Region(
-      name: 'hisui',
+      name: LocalizedLabel('Hisui', 'Hisui'),
       firstId: 899,
       lastId: 905,
       starters: [
@@ -105,7 +107,7 @@ class _RegionListState extends State<RegionList> {
       ],
     ),
     Region(
-      name: 'paldea',
+      name: LocalizedLabel('Paldea', 'Paldea'),
       firstId: 906,
       lastId: 1025,
       starters: [
@@ -115,7 +117,7 @@ class _RegionListState extends State<RegionList> {
       ],
     ),
     Region(
-      name: 'all pokemons',
+      name: LocalizedLabel('All Pokémon', 'Tous les Pokémon'),
       firstId: 1,
       lastId: 1025,
       starters: [
@@ -137,15 +139,15 @@ class _RegionListState extends State<RegionList> {
         return Container(
           margin: const EdgeInsets.only(bottom: 16),
           decoration: BoxDecoration(
-            gradient: const LinearGradient(
-              colors: [Color(0xFF2A2D34), Color(0xFF1E1E1E)],
+            gradient: LinearGradient(
+              colors: [context.colors.surfaceContainerHighest, context.cardColor],
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
             ),
             borderRadius: BorderRadius.circular(20),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withValues(alpha: 0.4),
+                color: Colors.black.withValues(alpha: 0.25),
                 blurRadius: 10,
                 offset: const Offset(0, 5),
               ),
@@ -160,7 +162,7 @@ class _RegionListState extends State<RegionList> {
                   context,
                   MaterialPageRoute(
                     builder: (context) => PokemonPage(
-                      regionName: region.name,
+                      regionName: context.label(region.name),
                       startId: region.firstId,
                       endId: region.lastId,
                     ),
@@ -181,12 +183,12 @@ class _RegionListState extends State<RegionList> {
                             fit: BoxFit.scaleDown,
                             alignment: Alignment.centerLeft,
                             child: Text(
-                              region.name.toUpperCase(),
-                              style: const TextStyle(
+                              context.label(region.name).toUpperCase(),
+                              style: TextStyle(
                                 fontWeight: FontWeight.w900,
                                 fontSize: 20,
                                 letterSpacing: 1.5,
-                                color: Colors.white,
+                                color: context.colors.onSurface,
                               ),
                             ),
                           ),
@@ -197,15 +199,15 @@ class _RegionListState extends State<RegionList> {
                               vertical: 4,
                             ),
                             decoration: BoxDecoration(
-                              color: Colors.black.withValues(alpha: 0.3),
+                              color: context.colors.onSurface.withValues(alpha: 0.08),
                               borderRadius: BorderRadius.circular(12),
                             ),
                             child: Text(
                               '#${region.firstId.toString().padLeft(4, '0')} - #${region.lastId.toString().padLeft(4, '0')}',
-                              style: const TextStyle(
+                              style: TextStyle(
                                 fontWeight: FontWeight.bold,
                                 fontSize: 12,
-                                color: Colors.grey,
+                                color: context.mutedColor,
                               ),
                             ),
                           ),
@@ -216,28 +218,15 @@ class _RegionListState extends State<RegionList> {
 
                     Expanded(
                       flex: 6,
+                      // Remplit l'espace au maximum sans déformer les sprites.
                       child: FittedBox(
-                        fit: BoxFit
-                            .contain, // Demande de remplir l'espace au maximum
+                        fit: BoxFit.contain,
                         alignment: Alignment.centerRight,
                         child: Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            Image.network(
-                              region.starters[0],
-                              height: 100,
-                              width: 100,
-                            ),
-                            Image.network(
-                              region.starters[1],
-                              height: 100,
-                              width: 100,
-                            ),
-                            Image.network(
-                              region.starters[2],
-                              height: 100,
-                              width: 100,
-                            ),
+                            for (final starter in region.starters)
+                              Image.network(starter, height: 100, width: 100),
                           ],
                         ),
                       ),
