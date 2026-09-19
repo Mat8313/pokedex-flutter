@@ -5,7 +5,7 @@ plugins {
 }
 
 android {
-    namespace = "com.example.pokedex"
+    namespace = "com.mat8313.pokedex"
     compileSdk = flutter.compileSdkVersion
     ndkVersion = flutter.ndkVersion
 
@@ -16,7 +16,7 @@ android {
 
     defaultConfig {
         // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
-        applicationId = "com.example.pokedex"
+        applicationId = "com.mat8313.pokedex"
         // You can update the following values to match your application needs.
         // For more information, see: https://flutter.dev/to/review-gradle-config.
         minSdk = flutter.minSdkVersion

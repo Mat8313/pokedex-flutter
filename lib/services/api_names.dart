@@ -16,6 +16,11 @@ class ApiNames {
     'item': 'assets/i18n/item_names.json',
   };
 
+  /// Les types de chaque espèce, pour filtrer une grille sans requête.
+  static const String _typesAsset = 'assets/i18n/pokemon_types.json';
+
+  static Map<String, List<String>> _speciesTypes = const {};
+
   static final Map<String, Map<String, Map<String, String>>> _tables = {};
 
   /// À appeler une fois au démarrage, avant `runApp`.
@@ -30,6 +35,12 @@ class ApiNames {
           ),
       };
     }
+
+    final types = jsonDecode(await rootBundle.loadString(_typesAsset)) as Map<String, dynamic>;
+    _speciesTypes = {
+      for (final entry in types.entries)
+        entry.key: [for (final type in entry.value as List) type as String],
+    };
   }
 
   static String _lookup(String table, String key, Locale locale, String fallback) {
@@ -52,6 +63,10 @@ class ApiNames {
   /// renvoient les chaînes d'évolution.
   static String item(String identifier, Locale locale) =>
       _lookup('item', identifier, locale, identifier);
+
+  /// Les types d'une espèce, en clés d'API minuscules. Vide pour une forme
+  /// alternative, absente de la table.
+  static List<String> types(int speciesId) => _speciesTypes['$speciesId'] ?? const [];
 
   /// `mr-mime` → `Mr Mime`. Dernier recours, quand aucune traduction n'existe.
   static String prettify(String apiName) => apiName
