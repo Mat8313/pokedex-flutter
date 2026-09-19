@@ -21,6 +21,11 @@ class ApiNames {
 
   static Map<String, List<String>> _speciesTypes = const {};
 
+  /// Les formes alternatives d'une espèce, avec leur jeu d'introduction.
+  static const String _formsAsset = 'assets/i18n/forms.json';
+
+  static Map<String, List<Map<String, dynamic>>> _speciesForms = const {};
+
   static final Map<String, Map<String, Map<String, String>>> _tables = {};
 
   /// À appeler une fois au démarrage, avant `runApp`.
@@ -40,6 +45,14 @@ class ApiNames {
     _speciesTypes = {
       for (final entry in types.entries)
         entry.key: [for (final type in entry.value as List) type as String],
+    };
+
+    final forms = jsonDecode(await rootBundle.loadString(_formsAsset)) as Map<String, dynamic>;
+    _speciesForms = {
+      for (final entry in forms.entries)
+        entry.key: [
+          for (final form in entry.value as List) form as Map<String, dynamic>,
+        ],
     };
   }
 
@@ -67,6 +80,10 @@ class ApiNames {
   /// Les types d'une espèce, en clés d'API minuscules. Vide pour une forme
   /// alternative, absente de la table.
   static List<String> types(int speciesId) => _speciesTypes['$speciesId'] ?? const [];
+
+  /// Les formes alternatives d'une espèce, telles que le fichier les décrit.
+  static List<Map<String, dynamic>> forms(int speciesId) =>
+      _speciesForms['$speciesId'] ?? const [];
 
   /// `mr-mime` → `Mr Mime`. Dernier recours, quand aucune traduction n'existe.
   static String prettify(String apiName) => apiName

@@ -4,6 +4,7 @@ import '../l10n/localized_label.dart';
 
 import '../l10n/app_localizations.dart';
 import '../models/game.dart';
+import '../models/game_forms.dart';
 import '../models/pokedex_entry.dart';
 import '../services/poke_api_service.dart';
 import '../theme/app_theme.dart';
@@ -31,8 +32,12 @@ class _GamePokedexPageState extends State<GamePokedexPage> {
   /// commence par `@`, la collision est donc impossible.
   static const String _nationalKey = '@national';
 
-  Future<List<PokedexEntry>> _regionalDex(String apiName) => _dexFutures
-      .putIfAbsent(apiName, () => apiService.fetchPokedexEntries(apiName));
+  Future<List<PokedexEntry>> _regionalDex(String apiName) => _dexFutures.putIfAbsent(
+    apiName,
+    // Les formes sont ajoutées ici plutôt que dans le service : elles dépendent
+    // du jeu consulté, pas du Pokédex demandé.
+    () async => withGameForms(await apiService.fetchPokedexEntries(apiName), widget.game),
+  );
 
   /// Le Pokédex National du jeu : la liste complète des espèces jusqu'à son
   /// plafond, celles que le jeu ne contient pas étant marquées et non retirées.
@@ -50,10 +55,13 @@ class _GamePokedexPageState extends State<GamePokedexPage> {
           ...widget.game.pokedexes.map((dex) => _regionalDex(dex.apiName)),
         ]);
 
-        return buildNationalDex(
-          allSpecies: dexes.first,
-          upTo: widget.game.nationalDexMax!,
-          availableSpecies: speciesInGame(dexes.skip(1).toList()),
+        return withGameForms(
+          buildNationalDex(
+            allSpecies: dexes.first,
+            upTo: widget.game.nationalDexMax!,
+            availableSpecies: speciesInGame(dexes.skip(1).toList()),
+          ),
+          widget.game,
         );
       });
 

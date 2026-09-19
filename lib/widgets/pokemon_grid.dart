@@ -42,7 +42,7 @@ class _PokemonGridState extends State<PokemonGrid> {
   bool _matchesSearch(PokedexEntry entry, String query) {
     if (query.isEmpty) return true;
 
-    final translated = context.speciesName(entry.speciesId, entry.name).toLowerCase();
+    final translated = entry.displayName(context).toLowerCase();
 
     return translated.contains(query) ||
         entry.name.toLowerCase().contains(query) ||
@@ -279,7 +279,7 @@ class _PokemonTile extends StatelessWidget {
                 child: Padding(padding: const EdgeInsets.all(8.0), child: sprite),
               ),
               Text(
-                context.speciesName(entry.speciesId, entry.name).toUpperCase(),
+                entry.displayName(context).toUpperCase(),
                 style: TextStyle(
                   fontWeight: FontWeight.bold,
                   fontSize: 12,

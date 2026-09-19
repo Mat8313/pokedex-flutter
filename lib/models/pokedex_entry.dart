@@ -1,3 +1,7 @@
+import 'package:flutter/widgets.dart';
+
+import '../services/api_names.dart';
+
 /// Une entrée de Pokédex.
 ///
 /// [entryNumber] est le numéro dans ce Pokédex-là, [speciesId] le numéro
@@ -13,11 +17,21 @@ class PokedexEntry {
   /// grise plutôt que de la retirer, sans quoi la numérotation sauterait.
   final bool availableInGame;
 
+  /// Identifiant /pokemon de la forme représentée, quand l'entrée n'est pas
+  /// l'espèce par défaut. Sert pour le visuel, rangé sous cet identifiant.
+  final int? formId;
+
+  /// Nom de la forme par code de langue, l'API ne servant pas de nom
+  /// d'espèce pour une forme alternative.
+  final Map<String, String>? formLabels;
+
   const PokedexEntry({
     required this.entryNumber,
     required this.speciesId,
     required this.name,
     this.availableInGame = true,
+    this.formId,
+    this.formLabels,
   });
 
   factory PokedexEntry.fromJson(Map<String, dynamic> json) {
@@ -34,8 +48,18 @@ class PokedexEntry {
   /// nationale — seul cas où afficher les deux numéros a un intérêt.
   bool get hasOwnNumbering => entryNumber != speciesId;
 
+  /// Le nom a afficher : celui de la forme s'il y en a une, sinon le nom
+  /// traduit de l'espece.
+  String displayName(BuildContext context) {
+    final language = Localizations.localeOf(context).languageCode;
+    final label = formLabels?[language] ?? formLabels?['en'];
+
+    return label ?? context.speciesName(speciesId, name);
+  }
+
+  /// Le visuel d'une forme est rangé sous son propre identifiant.
   String get imageUrl =>
-      'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/$speciesId.png';
+      'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${formId ?? speciesId}.png';
 
   /// `.../pokemon-species/387/` → 387. L'endpoint `/pokedex` ne donne l'id de
   /// l'espèce nulle part ailleurs que dans cette URL.
