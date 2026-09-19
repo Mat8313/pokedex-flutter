@@ -15,7 +15,9 @@ void main() {
         MockHttpClient fakeClient = MockHttpClient();
         int limit = 151;
         int offset = 0;
-        final url = Uri.parse('https://pokeapi.co/api/v2/pokemon?limit=$limit&offset=$offset');
+        final url = Uri.parse(
+          'https://pokeapi.co/api/v2/pokemon?limit=$limit&offset=$offset',
+        );
         http.Response fakeResponse = http.Response(
           '{"results": [{"name": "bulbasaur", "url": "https://pokeapi.co/api/v2/pokemon/1/"}]}',
           200,
@@ -34,30 +36,27 @@ void main() {
       },
     );
 
-    test(
-      'Doit récupérer le détail de pokémon valide depuis la PokéAPI',
-      () async {
-        MockHttpClient fakeClient = MockHttpClient();
-        int id = 1;
-        final url = Uri.parse('https://pokeapi.co/api/v2/pokemon/$id');
-        http.Response fakeResponse = http.Response(
-          '{"id": 1, "name": "bulbasaur", "height": 7, "weight": 69, '
-          '"types": [{"type": {"name": "grass"}}, {"type": {"name": "poison"}}], '
-          '"sprites": {"front_default": "default.png", "front_shiny": null, "front_female": null, "front_shiny_female": null}, '
-          '"forms": [{"name": "bulbasaur", "url": "https://pokeapi.co/api/v2/pokemon-form/1/"}]}',
-          200,
-        );
-        when(() => fakeClient.get(url)).thenAnswer((_) async => fakeResponse);
-        final service = PokeApiService(client: fakeClient);
+    test('Doit récupérer le détail de pokémon valide depuis la PokéAPI', () async {
+      MockHttpClient fakeClient = MockHttpClient();
+      int id = 1;
+      final url = Uri.parse('https://pokeapi.co/api/v2/pokemon/$id');
+      http.Response fakeResponse = http.Response(
+        '{"id": 1, "name": "bulbasaur", "height": 7, "weight": 69, '
+        '"types": [{"type": {"name": "grass"}}, {"type": {"name": "poison"}}], '
+        '"sprites": {"front_default": "default.png", "front_shiny": null, "front_female": null, "front_shiny_female": null}, '
+        '"forms": [{"name": "bulbasaur", "url": "https://pokeapi.co/api/v2/pokemon-form/1/"}]}',
+        200,
+      );
+      when(() => fakeClient.get(url)).thenAnswer((_) async => fakeResponse);
+      final service = PokeApiService(client: fakeClient);
 
-        final pokemonDetail = await service.fetchPokemonDetails(id);
-        expect(pokemonDetail, isNotNull);
-        final firstPokemon = pokemonDetail;
-        expect(firstPokemon.height, 7);
-        expect(firstPokemon.weight, 69);
-        expect(firstPokemon.types, ['GRASS', 'POISON']);
-      },
-    );
+      final pokemonDetail = await service.fetchPokemonDetails(id);
+      expect(pokemonDetail, isNotNull);
+      final firstPokemon = pokemonDetail;
+      expect(firstPokemon.height, 7);
+      expect(firstPokemon.weight, 69);
+      expect(firstPokemon.types, ['GRASS', 'POISON']);
+    });
 
     test(
       'Doit garder les formes alternatives classiques et exclure les mega/gmax',
@@ -85,46 +84,79 @@ void main() {
       },
     );
 
+    test('Doit récupérer le jeu qui a introduit une forme', () async {
+      MockHttpClient fakeClient = MockHttpClient();
+      int formId = 10364;
+      final url = Uri.parse('https://pokeapi.co/api/v2/pokemon-form/$formId');
+      http.Response fakeResponse = http.Response(
+        '{"name": "venusaur-gmax", "version_group": {"name": "sword-shield"}}',
+        200,
+      );
+      when(() => fakeClient.get(url)).thenAnswer((_) async => fakeResponse);
+      final service = PokeApiService(client: fakeClient);
+
+      expect(await service.fetchFormVersionGroup(formId), 'sword-shield');
+    });
+
+    test('Doit récupérer uniquement les formes mega et gmax', () async {
+      MockHttpClient fakeClient = MockHttpClient();
+      int id = 3;
+      final url = Uri.parse('https://pokeapi.co/api/v2/pokemon-species/$id');
+      http.Response fakeResponse = http.Response(
+        '{"varieties": ['
+        '{"is_default": true, "pokemon": {"name": "venusaur", "url": "https://pokeapi.co/api/v2/pokemon/3/"}}, '
+        '{"is_default": false, "pokemon": {"name": "venusaur-mega", "url": "https://pokeapi.co/api/v2/pokemon/10033/"}}, '
+        '{"is_default": false, "pokemon": {"name": "venusaur-gmax", "url": "https://pokeapi.co/api/v2/pokemon/10195/"}}, '
+        '{"is_default": false, "pokemon": {"name": "venusaur-alt", "url": "https://pokeapi.co/api/v2/pokemon/10222/"}}'
+        ']}',
+        200,
+      );
+      when(() => fakeClient.get(url)).thenAnswer((_) async => fakeResponse);
+      final service = PokeApiService(client: fakeClient);
+
+      final transformations = await service.fetchPokemonTransformation(id);
+
+      expect(transformations.length, 2);
+      expect(
+        transformations.map((f) => f.name),
+        containsAll(['venusaur-mega', 'venusaur-gmax']),
+      );
+    });
     test(
-      'Doit récupérer le jeu qui a introduit une forme',
+      "Doit récupérer les entrées d'un Pokédex et les trier par numéro",
       () async {
         MockHttpClient fakeClient = MockHttpClient();
-        int formId = 10364;
-        final url = Uri.parse('https://pokeapi.co/api/v2/pokemon-form/$formId');
-        http.Response fakeResponse = http.Response(
-          '{"name": "venusaur-gmax", "version_group": {"name": "sword-shield"}}',
-          200,
+        final url = Uri.parse(
+          'https://pokeapi.co/api/v2/pokedex/original-sinnoh',
         );
-        when(() => fakeClient.get(url)).thenAnswer((_) async => fakeResponse);
-        final service = PokeApiService(client: fakeClient);
-
-        expect(await service.fetchFormVersionGroup(formId), 'sword-shield');
-      },
-    );
-
-    test(
-      'Doit récupérer uniquement les formes mega et gmax',
-      () async {
-        MockHttpClient fakeClient = MockHttpClient();
-        int id = 3;
-        final url = Uri.parse('https://pokeapi.co/api/v2/pokemon-species/$id');
+        // Volontairement désordonné : l'API rend les entrées triées, mais rien
+        // ne l'y oblige.
         http.Response fakeResponse = http.Response(
-          '{"varieties": ['
-          '{"is_default": true, "pokemon": {"name": "venusaur", "url": "https://pokeapi.co/api/v2/pokemon/3/"}}, '
-          '{"is_default": false, "pokemon": {"name": "venusaur-mega", "url": "https://pokeapi.co/api/v2/pokemon/10033/"}}, '
-          '{"is_default": false, "pokemon": {"name": "venusaur-gmax", "url": "https://pokeapi.co/api/v2/pokemon/10195/"}}, '
-          '{"is_default": false, "pokemon": {"name": "venusaur-alt", "url": "https://pokeapi.co/api/v2/pokemon/10222/"}}'
+          '{"pokemon_entries": ['
+          '{"entry_number": 4, "pokemon_species": {"name": "chimchar", "url": "https://pokeapi.co/api/v2/pokemon-species/390/"}}, '
+          '{"entry_number": 1, "pokemon_species": {"name": "turtwig", "url": "https://pokeapi.co/api/v2/pokemon-species/387/"}}'
           ']}',
           200,
         );
         when(() => fakeClient.get(url)).thenAnswer((_) async => fakeResponse);
         final service = PokeApiService(client: fakeClient);
 
-        final transformations = await service.fetchPokemonTransformation(id);
+        final entries = await service.fetchPokedexEntries('original-sinnoh');
 
-        expect(transformations.length, 2);
-        expect(transformations.map((f) => f.name), containsAll(['venusaur-mega', 'venusaur-gmax']));
+        expect(entries.map((e) => e.entryNumber), [1, 4]);
+        expect(entries.map((e) => e.speciesId), [387, 390]);
+        expect(entries.first.name, 'turtwig');
       },
     );
+
+    test('Doit lever une exception quand le Pokédex est introuvable', () async {
+      MockHttpClient fakeClient = MockHttpClient();
+      final url = Uri.parse('https://pokeapi.co/api/v2/pokedex/inexistant');
+      when(() => fakeClient.get(url))
+          .thenAnswer((_) async => http.Response('Not Found', 404));
+      final service = PokeApiService(client: fakeClient);
+
+      expect(() => service.fetchPokedexEntries('inexistant'), throwsException);
+    });
   });
 }
