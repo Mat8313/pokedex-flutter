@@ -72,7 +72,7 @@ class BattleTab extends StatelessWidget {
       if (multiplier == 0) immunities[type] = multiplier;
     });
 
-    return ListView(
+    return DetailTabList(
       padding: const EdgeInsets.fromLTRB(16, 16, 16, 32),
       children: [
         DetailPanel(

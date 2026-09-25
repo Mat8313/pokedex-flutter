@@ -34,9 +34,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get tabEvolutions => 'EVOLUTIONS';
 
   @override
-  String get errorPokedexLoad => 'Could not load this Pokédex';
-
-  @override
   String get errorNetwork => 'Network error';
 
   @override
@@ -247,4 +244,19 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get gameNoNationalDex => 'This game has no National Pokédex.';
+
+  @override
+  String get errorNetworkHint => 'Check your connection, then try again.';
+
+  @override
+  String get errorFormLoad => 'Couldn\'t load this form.';
+
+  @override
+  String get noGameSprites => 'No game sprites for this form';
+
+  @override
+  String get a11yFemaleSprite => 'Female sprite';
+
+  @override
+  String get a11yShinySprite => 'Shiny sprite';
 }

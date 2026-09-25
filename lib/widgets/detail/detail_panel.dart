@@ -1,5 +1,43 @@
 import 'package:flutter/material.dart';
 
+/// Le contenu défilant d'un onglet de la fiche.
+///
+/// La barre d'onglets est épinglée dans un `SliverOverlapAbsorber` : sans
+/// l'injecteur correspondant, la liste démarrerait sous la barre et ses
+/// premières lignes passeraient derrière les onglets.
+///
+/// Sur tablette, les onglets vivent dans leur propre colonne, hors de tout
+/// `NestedScrollView` : il n'y a alors rien à injecter.
+class DetailTabList extends StatelessWidget {
+  final EdgeInsetsGeometry padding;
+  final List<Widget> children;
+
+  const DetailTabList({
+    super.key,
+    required this.padding,
+    required this.children,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final isNested =
+        context.findAncestorStateOfType<NestedScrollViewState>() != null;
+
+    return CustomScrollView(
+      slivers: [
+        if (isNested)
+          SliverOverlapInjector(
+            handle: NestedScrollView.sliverOverlapAbsorberHandleFor(context),
+          ),
+        SliverPadding(
+          padding: padding,
+          sliver: SliverList.list(children: children),
+        ),
+      ],
+    );
+  }
+}
+
 /// Un bloc de la fiche de détail.
 ///
 /// Le fond de la fiche est l'image du type, toujours colorée : ces panneaux

@@ -32,6 +32,32 @@ void main() {
       expect(ApiNames.item('fire-stone', const Locale('en')), 'Fire Stone');
     });
 
+    test("Doit traduire une forme alternative d'après son espèce", () {
+      expect(
+        ApiNames.form(128, 'tauros-paldea-blaze-breed', const Locale('fr')),
+        'Tauros de Paldéa Race Flamboyante',
+      );
+      expect(
+        ApiNames.form(128, 'tauros-paldea-blaze-breed', const Locale('en')),
+        'Paldean Tauros (Blaze Breed)',
+      );
+    });
+
+    test("Doit nommer les méga-évolutions d'après l'espèce, selon la langue", () {
+      expect(ApiNames.form(6, 'charizard-mega-x', const Locale('fr')), 'Méga-Dracaufeu X');
+      expect(ApiNames.form(6, 'charizard-mega-x', const Locale('en')), 'Mega Charizard X');
+      expect(ApiNames.form(3, 'venusaur-mega', const Locale('fr')), 'Méga-Florizarre');
+    });
+
+    test("Doit nommer les formes Gigamax d'après l'espèce, selon la langue", () {
+      expect(ApiNames.form(6, 'charizard-gmax', const Locale('fr')), 'Dracaufeu Gigamax');
+      expect(ApiNames.form(6, 'charizard-gmax', const Locale('en')), 'Gigantamax Charizard');
+    });
+
+    test("Doit se replier sur l'identifiant pour une forme inconnue", () {
+      expect(ApiNames.form(6, 'charizard-starter', const Locale('fr')), 'Charizard Starter');
+    });
+
     test('Doit traduire les talents', () {
       expect(ApiNames.ability(65, const Locale('en'), apiName: 'overgrow'), 'Overgrow');
       expect(ApiNames.ability(65, const Locale('fr'), apiName: 'overgrow'), 'Engrais');

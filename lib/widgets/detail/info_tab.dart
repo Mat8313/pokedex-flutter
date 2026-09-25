@@ -6,6 +6,7 @@ import '../../models/egg_group.dart';
 import '../../models/pokemon_detail.dart';
 import '../../models/pokemon_species.dart';
 import '../../services/api_names.dart';
+import '../network_error.dart';
 import 'detail_panel.dart';
 
 /// L'onglet « Infos » : la carte d'identité de l'espèce.
@@ -13,7 +14,18 @@ class InfoTab extends StatelessWidget {
   final PokemonDetail details;
   final PokemonSpecies? species;
 
-  const InfoTab({super.key, required this.details, required this.species});
+  /// L'espèce n'a pas pu être chargée : la taille, le poids et les talents
+  /// viennent du détail et restent affichés, seule la partie espèce manque.
+  final bool speciesFailed;
+  final VoidCallback onRetry;
+
+  const InfoTab({
+    super.key,
+    required this.details,
+    required this.species,
+    required this.speciesFailed,
+    required this.onRetry,
+  });
 
   /// L'API compte en décimètres et en hectogrammes.
   static String _metres(int decimetres) => '${(decimetres / 10).toStringAsFixed(1)} m';
@@ -37,9 +49,11 @@ class InfoTab extends StatelessWidget {
     final flavor = species?.flavorText[language] ?? species?.flavorText['en'];
     final genus = species?.genus[language] ?? species?.genus['en'];
 
-    return ListView(
+    return DetailTabList(
       padding: const EdgeInsets.fromLTRB(16, 16, 16, 32),
       children: [
+        if (species == null && speciesFailed)
+          NetworkErrorView(onImage: true, onRetry: onRetry),
         if (flavor != null)
           DetailPanel(
             title: l10n.infoPokedexEntry,

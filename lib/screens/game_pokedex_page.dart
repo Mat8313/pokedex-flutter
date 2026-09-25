@@ -7,7 +7,7 @@ import '../models/game.dart';
 import '../models/game_forms.dart';
 import '../models/pokedex_entry.dart';
 import '../services/poke_api_service.dart';
-import '../theme/app_theme.dart';
+import '../widgets/network_error.dart';
 import '../widgets/pokemon_grid.dart';
 
 /// Le Pokédex d'un jeu : un onglet par Pokédex régional, plus un onglet
@@ -75,13 +75,10 @@ class _GamePokedexPageState extends State<GamePokedexPage> {
       builder: (context) => FutureBuilder<List<PokedexEntry>>(
         future: dexKey == _nationalKey ? _nationalDex() : _regionalDex(dexKey),
         builder: (context, snapshot) {
+          // Reconstruire la page recrée le Future : c'est tout ce que
+          // « Réessayer » a besoin de faire.
           if (snapshot.hasError) {
-            return Center(
-              child: Text(
-                AppLocalizations.of(context)!.errorPokedexLoad,
-                style: TextStyle(color: context.mutedColor),
-              ),
-            );
+            return NetworkErrorView(onRetry: () => setState(() {}));
           }
 
           if (!snapshot.hasData) {

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../utils/network_image.dart';
 
 import 'pokemon_page.dart';
 import '../models/region.dart';
@@ -226,7 +227,7 @@ class _RegionListState extends State<RegionList> {
                           mainAxisSize: MainAxisSize.min,
                           children: [
                             for (final starter in region.starters)
-                              Image.network(starter, height: 100, width: 100),
+                              Image(image: networkImage(starter), height: 100, width: 100),
                           ],
                         ),
                       ),

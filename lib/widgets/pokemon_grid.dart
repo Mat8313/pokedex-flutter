@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../utils/network_image.dart';
 
 import '../l10n/app_localizations.dart';
 import '../l10n/localized_label.dart';
@@ -236,7 +237,7 @@ class _PokemonTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    Widget sprite = Image.network(entry.imageUrl, fit: BoxFit.contain);
+    Widget sprite = Image(image: networkImage(entry.imageUrl), fit: BoxFit.contain);
     if (missing) {
       sprite = ColorFiltered(
         colorFilter: const ColorFilter.matrix(_greyscale),
@@ -254,6 +255,7 @@ class _PokemonTile extends StatelessWidget {
               // Le numéro national, jamais le numéro régional : le Pokédex de
               // Sinnoh commence à Tortipouss, qui est le 387e national.
               pokemonId: entry.speciesId,
+              initialFormId: entry.formId,
             ),
           ),
         );

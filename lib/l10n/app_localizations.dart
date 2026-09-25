@@ -146,12 +146,6 @@ abstract class AppLocalizations {
   /// **'EVOLUTIONS'**
   String get tabEvolutions;
 
-  /// No description provided for @errorPokedexLoad.
-  ///
-  /// In en, this message translates to:
-  /// **'Could not load this Pokédex'**
-  String get errorPokedexLoad;
-
   /// No description provided for @errorNetwork.
   ///
   /// In en, this message translates to:
@@ -535,6 +529,36 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'This game has no National Pokédex.'**
   String get gameNoNationalDex;
+
+  /// No description provided for @errorNetworkHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Check your connection, then try again.'**
+  String get errorNetworkHint;
+
+  /// No description provided for @errorFormLoad.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t load this form.'**
+  String get errorFormLoad;
+
+  /// No description provided for @noGameSprites.
+  ///
+  /// In en, this message translates to:
+  /// **'No game sprites for this form'**
+  String get noGameSprites;
+
+  /// No description provided for @a11yFemaleSprite.
+  ///
+  /// In en, this message translates to:
+  /// **'Female sprite'**
+  String get a11yFemaleSprite;
+
+  /// No description provided for @a11yShinySprite.
+  ///
+  /// In en, this message translates to:
+  /// **'Shiny sprite'**
+  String get a11yShinySprite;
 }
 
 class _AppLocalizationsDelegate

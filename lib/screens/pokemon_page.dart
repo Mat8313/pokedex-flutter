@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../widgets/network_error.dart';
+
 import '../services/poke_api_service.dart';
 import '../models/pokemon.dart';
 import '../models/pokedex_entry.dart';
@@ -23,6 +25,7 @@ class PokemonPage extends StatefulWidget {
 class _PokemonPageState extends State<PokemonPage> {
   List<Pokemon> pokemonList = [];
   bool isLoading = true; // Pour afficher un chargement stylé
+  bool hasError = false;
 
   final PokeApiService apiService = PokeApiService();
 
@@ -31,13 +34,18 @@ class _PokemonPageState extends State<PokemonPage> {
     int offset = widget.startId - 1;
     try {
       final list = await apiService.fetchPokemonList(limit, offset);
+      if (!mounted) return;
       setState(() {
         pokemonList = list;
         isLoading = false;
       });
     } catch (e) {
       debugPrint('ERREUR réseaux : $e');
-      setState(() => isLoading = false);
+      if (!mounted) return;
+      setState(() {
+        isLoading = false;
+        hasError = true;
+      });
     }
   }
 
@@ -54,6 +62,16 @@ class _PokemonPageState extends State<PokemonPage> {
 
       body: isLoading
           ? const Center(child: CircularProgressIndicator())
+          : hasError
+          ? NetworkErrorView(
+              onRetry: () {
+                setState(() {
+                  isLoading = true;
+                  hasError = false;
+                });
+                fetchPokemonList();
+              },
+            )
           // Le tri par région numérote au national : les deux numéros d'une
           // entrée sont donc les mêmes.
           : PokemonGrid(

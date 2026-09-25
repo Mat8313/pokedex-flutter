@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+import '../../utils/network_image.dart';
 
 import '../../l10n/app_localizations.dart';
 import '../../models/pokemon_species.dart';
 import '../../services/api_names.dart';
+import '../network_error.dart';
 import 'detail_panel.dart';
 
 /// L'onglet « Évolutions » : la chaîne complète, avec ses conditions.
@@ -11,11 +13,18 @@ class EvolutionTab extends StatelessWidget {
   final int currentSpeciesId;
   final void Function(int speciesId, String apiName) onSelect;
 
+  /// L'espèce n'a pas pu être chargée : sans elle, pas de chaîne à afficher.
+  /// Il ne faut surtout pas conclure que le Pokémon n'évolue pas.
+  final bool speciesFailed;
+  final VoidCallback onRetry;
+
   const EvolutionTab({
     super.key,
     required this.chain,
     required this.currentSpeciesId,
     required this.onSelect,
+    required this.speciesFailed,
+    required this.onRetry,
   });
 
   /// Traduit une condition d'évolution.
@@ -56,6 +65,10 @@ class EvolutionTab extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
+    if (chain == null && speciesFailed) {
+      return NetworkErrorView(onImage: true, onRetry: onRetry);
+    }
+
     final nodes = chain?.flattened ?? const <EvolutionNode>[];
 
     if (nodes.length < 2) {
@@ -71,7 +84,7 @@ class EvolutionTab extends StatelessWidget {
       );
     }
 
-    return ListView(
+    return DetailTabList(
       padding: const EdgeInsets.fromLTRB(16, 16, 16, 32),
       children: [
         DetailPanel(
@@ -137,8 +150,10 @@ class _EvolutionRow extends StatelessWidget {
               padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
               child: Row(
                 children: [
-                  Image.network(
-                    'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${node.speciesId}.png',
+                  Image(
+                    image: networkImage(
+                      'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${node.speciesId}.png',
+                    ),
                     height: 56,
                     width: 56,
                     errorBuilder: (context, error, stackTrace) =>

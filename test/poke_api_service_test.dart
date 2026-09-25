@@ -1,4 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:pokedex/services/api_cache.dart';
 import 'package:pokedex/services/poke_api_service.dart';
 
 import 'package:mocktail/mocktail.dart';
@@ -6,6 +7,21 @@ import 'package:http/http.dart' as http;
 
 // On crée une classe vide qui copie le comportement d'un http.Client grâce à Mocktail
 class MockHttpClient extends Mock implements http.Client {}
+
+/// Un cache en mémoire dont on choisit la fraîcheur, pour tester les deux chemins.
+class FakeApiCache implements ApiCache {
+  final Map<Uri, String> bodies = {};
+  bool fresh;
+
+  FakeApiCache({this.fresh = true});
+
+  @override
+  Future<CachedBody?> read(Uri url) async =>
+      bodies.containsKey(url) ? CachedBody(bodies[url]!, isFresh: fresh) : null;
+
+  @override
+  Future<void> write(Uri url, String body) async => bodies[url] = body;
+}
 
 void main() {
   group('PokeApiService Tests (Réseau factice)', () {
@@ -168,6 +184,55 @@ void main() {
       final service = PokeApiService(client: fakeClient);
 
       expect(() => service.fetchPokedexEntries('inexistant'), throwsException);
+    });
+  });
+
+  group('Cache des réponses', () {
+    setUpAll(() => registerFallbackValue(Uri()));
+
+    final url = Uri.parse('https://pokeapi.co/api/v2/pokedex/kanto');
+    const body = '{"pokemon_entries": [{"entry_number": 1, "pokemon_species": '
+        '{"name": "bulbasaur", "url": "https://pokeapi.co/api/v2/pokemon-species/1/"}}]}';
+
+    test('Doit servir une réponse récente sans toucher au réseau', () async {
+      final fakeClient = MockHttpClient();
+      final cache = FakeApiCache()..bodies[url] = body;
+      final service = PokeApiService(client: fakeClient, cache: cache);
+
+      final entries = await service.fetchPokedexEntries('kanto');
+
+      expect(entries.single.speciesId, 1);
+      verifyNever(() => fakeClient.get(any()));
+    });
+
+    test('Doit garder la réponse du réseau pour la fois suivante', () async {
+      final fakeClient = MockHttpClient();
+      when(() => fakeClient.get(url)).thenAnswer((_) async => http.Response(body, 200));
+      final cache = FakeApiCache();
+      final service = PokeApiService(client: fakeClient, cache: cache);
+
+      await service.fetchPokedexEntries('kanto');
+
+      expect(cache.bodies[url], body);
+    });
+
+    test('Doit se rabattre sur une réponse ancienne quand le réseau échoue', () async {
+      final fakeClient = MockHttpClient();
+      when(() => fakeClient.get(url)).thenThrow(Exception('hors ligne'));
+      final cache = FakeApiCache(fresh: false)..bodies[url] = body;
+      final service = PokeApiService(client: fakeClient, cache: cache);
+
+      final entries = await service.fetchPokedexEntries('kanto');
+
+      expect(entries.single.speciesId, 1);
+    });
+
+    test("Doit échouer hors ligne quand rien n'est en cache", () async {
+      final fakeClient = MockHttpClient();
+      when(() => fakeClient.get(url)).thenThrow(Exception('hors ligne'));
+      final service = PokeApiService(client: fakeClient, cache: FakeApiCache());
+
+      expect(() => service.fetchPokedexEntries('kanto'), throwsException);
     });
   });
 }

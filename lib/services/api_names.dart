@@ -85,6 +85,39 @@ class ApiNames {
   static List<Map<String, dynamic>> forms(int speciesId) =>
       _speciesForms['$speciesId'] ?? const [];
 
+  /// Nom traduit d'une forme alternative (`tauros-paldea-blaze-breed`), cherché
+  /// parmi les formes de son espèce.
+  ///
+  /// Méga-évolutions et formes Gigamax sont absentes du fichier, mais leur nom
+  /// se déduit de celui de l'espèce, selon l'usage de chaque langue :
+  /// « Méga-Dracaufeu X » / « Mega Charizard X », « Dracaufeu Gigamax » /
+  /// « Gigantamax Charizard ». Le reste — variantes purement cosmétiques —
+  /// retombe sur l'identifiant mis en forme.
+  static String form(int speciesId, String apiName, Locale locale) {
+    for (final form in forms(speciesId)) {
+      if (form['name'] == apiName) {
+        return (form[locale.languageCode] ?? form['en']) as String;
+      }
+    }
+
+    final french = locale.languageCode == 'fr';
+
+    final mega = RegExp(r'^(.+)-mega(?:-([xy]))?$').firstMatch(apiName);
+    if (mega != null) {
+      final name = species(speciesId, locale, apiName: mega[1]!);
+      final variant = mega[2] == null ? '' : ' ${mega[2]!.toUpperCase()}';
+      return french ? 'Méga-$name$variant' : 'Mega $name$variant';
+    }
+
+    final gmax = RegExp(r'^(.+)-gmax$').firstMatch(apiName);
+    if (gmax != null) {
+      final name = species(speciesId, locale, apiName: gmax[1]!);
+      return french ? '$name Gigamax' : 'Gigantamax $name';
+    }
+
+    return prettify(apiName);
+  }
+
   /// `mr-mime` → `Mr Mime`. Dernier recours, quand aucune traduction n'existe.
   static String prettify(String apiName) => apiName
       .split('-')
@@ -104,4 +137,7 @@ extension ApiNamesContext on BuildContext {
       ApiNames.ability(abilityId, _locale, apiName: apiName);
 
   String itemName(String identifier) => ApiNames.item(identifier, _locale);
+
+  String formName(int speciesId, String apiName) =>
+      ApiNames.form(speciesId, apiName, _locale);
 }

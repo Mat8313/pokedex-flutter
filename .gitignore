@@ -46,3 +46,13 @@ app.*.map.json
 
 # Widget Preview related
 .widget_preview/
+
+# Rapport des traductions manquantes, régénéré par flutter gen-l10n à chaque build
+l10n_manquants.txt
+
+# Claude Code : réglages locaux et configuration de prévisualisation
+.claude/settings.local.json
+.claude/launch.json
+
+# Vidéo de présentation générée par /brag (rendu, captures, projet Hyperframes)
+brag-output/
