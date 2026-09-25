@@ -1,4 +1,8 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Toutes les données viennent de la PokéAPI et des dépôts de sprites : sans
+         cette permission, un build release n'a aucun accès réseau (les manifestes
+         debug et profile la déclarent, pas celui-ci). -->
+    <uses-permission android:name="android.permission.INTERNET"/>
     <application
         android:label="Pokédex"
         android:name="${applicationName}"

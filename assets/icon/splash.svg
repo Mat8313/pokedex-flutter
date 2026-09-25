@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024">
+  <defs>
+    <linearGradient id="top" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#FFFFFF"/>
+      <stop offset="1" stop-color="#ECEEF3"/>
+    </linearGradient>
+    <linearGradient id="bottom" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#F4F5F8"/>
+      <stop offset="1" stop-color="#D5D9E2"/>
+    </linearGradient>
+    <clipPath id="disc"><circle cx="512" cy="512" r="300"/></clipPath>
+    <filter id="drop" x="-30%" y="-30%" width="160%" height="160%">
+      <feDropShadow dx="0" dy="18" stdDeviation="21.000000000000004" flood-color="#000000" flood-opacity="0"/>
+    </filter>
+  </defs>
+  <g filter="url(#drop)">
+    <g clip-path="url(#disc)">
+      <rect x="0" y="0" width="1024" height="512" fill="url(#top)"/>
+      <rect x="0" y="512" width="1024" height="512" fill="url(#bottom)"/>
+      <rect x="0" y="482" width="1024" height="60" fill="#17171C"/>
+      <!-- glossy highlight on the upper half -->
+      <ellipse cx="410" cy="356" rx="102.00000000000001" ry="51.00000000000001"
+               transform="rotate(-28 410 356)" fill="#FFFFFF" opacity="0.9"/>
+    </g>
+    <circle cx="512" cy="512" r="300" fill="none" stroke="#17171C" stroke-width="24"/>
+    <circle cx="512" cy="512" r="108" fill="#17171C"/>
+    <circle cx="512" cy="512" r="70.5" fill="#FFFFFF"/>
+    <circle cx="512" cy="512" r="37.2" fill="none" stroke="#D5D9E2" stroke-width="7.5"/>
+  </g></svg>
